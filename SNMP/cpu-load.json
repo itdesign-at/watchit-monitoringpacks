@@ -3,6 +3,6 @@
    "logic" : "AND",
    "module" : "Basic",
    "name" : "cpu-load SNMP",
-   "rule" : "[{\"section\":\"Net.cpuload.LoadAverage\",\"operator\":\"regex\",\"value\":\"\d+\",\"parameter\":\"\"}]",
+   "rule" : "[{\"section\":\"Net.cpuload.LoadAverage\",\"operator\":\"regex\",\"value\":\"d+\",\"parameter\":\"\"}]",
    "service" : "cpu-load"
 }
