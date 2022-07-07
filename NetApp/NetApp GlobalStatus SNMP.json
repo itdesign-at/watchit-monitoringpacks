@@ -1,1 +1,8 @@
-{"ServiceName":"Net App Global Status"}
+{
+   "Description" : "Global status",
+   "Logic" : "AND",
+   "Module" : "Application",
+   "Name" : "NetApp GlobalStatus SNMP",
+   "Rule" : "[{\"section\":\"Snmp.get.Value\",\"operator\":\"regex\",\"value\":\".+\",\"parameter\":\"oid=1.3.6.1.4.1.789.1.2.2.25.0\"}]",
+   "Service" : "Global status"
+}
