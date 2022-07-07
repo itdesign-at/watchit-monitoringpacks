@@ -4,5 +4,6 @@
    "module" : "Application",
    "name" : "NetApp GlobalStatus SNMP",
    "rule" : "[{\"section\":\"Snmp.get.Value\",\"operator\":\"regex\",\"value\":\".+\",\"parameter\":\"oid=1.3.6.1.4.1.789.1.2.2.25.0\"}]",
-   "service" : "Global status"
+   "service" : "Global status",
+   "parameter": "[{\"parameter\":\"ManagedSystems\",\"value\":\"DUMMY1,DUMMY2\",\"description\":\"Managed Systems\"}]"
 }
