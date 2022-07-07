@@ -1,1 +1,8 @@
-{"ServiceName":"cpu-load"}
+{
+   "description" : "The average, over the last minute, of the percentage of time that this processor was not idle. Implementations may approximate this one minute smoothing period if necessary. Threhold example: @{LoadAverage} gt 80%",
+   "logic" : "AND",
+   "module" : "Basic",
+   "name" : "cpu-load SNMP",
+   "rule" : "[{\"section\":\"Net.cpuload.LoadAverage\",\"operator\":\"regex\",\"value\":\"\\d+\",\"parameter\":\"\"}]",
+   "service" : "cpu-load"
+}
