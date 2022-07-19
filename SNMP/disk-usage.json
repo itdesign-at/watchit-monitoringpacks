@@ -1,8 +1,7 @@
 {
    "description" : "read hrStorage MIB",
-   "logic" : "AND",
+   "dialect" : "php",
    "module" : "Basic",
-   "name" : "disk-usage SNMP",
    "rule" : "[{\"section\":\"Net.cpuload.LoadAverage\",\"operator\":\"regex\",\"value\":\"d+\",\"parameter\":\"\"}]",
    "service" : "disk-usage"
 }
