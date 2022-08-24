@@ -8,7 +8,8 @@
  * Ubuntu 22.04 with PHP 8.1.2
  *
  * ported from file watchit-NetDisk.php
- * Werner.Neunteufl@itdesign.at, 2022-07-12
+ * 2022-07-12 W.N. first commit
+ * 2022-08-24 W.N. add debugger to CheckValue
  */
 require_once("/opt/watchit/sources/php/vendor/autoload.php");
 
@@ -35,20 +36,30 @@ if ($host === '') {
     exit(3);
 }
 
+$debug = $OPT['Debug'] ?? false;
+
+// $storageTable collects all storage entries, used at the
+// end to publish data and get a console output
+$storageTable = new StorageTable($OPT);
+$storageTable->setDebug($debug);
+
+// read raw data into $snmpStorageData
 $snmpStorageData = [];
 try {
     // param $host only, snmp data are read from the json exported file
     // hides security relevant params like community string, etc.
     $snmp = new Snmp($host);
+    $snmp->setDebug($debug);
     $snmpStorageData = $snmp->getStorageTable();
 } catch (Exception $e) {
-    // do nothing -> $storageTable stays empty
+    $storageTable->setNoData(['Text' => $e->getMessage(), 'Exit' => 3, 'State' => 'UNKNOWN']);
+    $storageTable->bye();
 }
 
+// under normal working conditions this should never occur
 if (count($snmpStorageData) < 1) {
-    // TODO: write "NoData" or "NULL" to measurements
-    print "no snmp answer\n";
-    exit(3);
+    $storageTable->setNoData(['Text' => 'no raw data from SNMP', 'Exit' => 3, 'State' => 'UNKNOWN']);
+    $storageTable->bye();
 }
 
 // set to 'ON' when no include filter is configured. Plugin::compare returns
@@ -60,10 +71,6 @@ if ($includeFilter === '') {
 
 // for a nice output
 $textTemplate = '@{Description} is @{State} (@{FreePercent}% free @{FreeReadable}@{FreeUnit}, @{UsedPercent}% used @{UsedReadable}@{UsedUnit})';
-
-// $storageTable collects all storage entries, used at the
-// end to publish data and get a console output
-$storageTable = new StorageTable($OPT);
 
 foreach ($snmpStorageData as $storageEntry) {
 
@@ -86,7 +93,7 @@ foreach ($snmpStorageData as $storageEntry) {
             continue;
         }
         // uppercase renames "memory" to "Memory" to have linux and
-        // windows the same notation
+        // windows the same description
         $description = uppercase($description);
     }
 
@@ -103,7 +110,9 @@ foreach ($snmpStorageData as $storageEntry) {
 
     $th = FilterThreshold::getThreshold(['h' => $host, 's' => $description, 'section' => $section]);
 
-    $cv = new CheckValue($storageEntry);
+    $cv = new CheckValue(['Debug' => $debug]);
+
+    $cv->add($storageEntry);
     $cv->add([
         'h' => "$host",
         's' => "$description",
@@ -178,4 +187,3 @@ function uppercase(string $description): string
     $description = str_replace("memory", "Memory", $description);
     return $description;
 }
-
