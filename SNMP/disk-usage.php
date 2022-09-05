@@ -8,8 +8,7 @@
  * Ubuntu 22.04 with PHP 8.1.2
  *
  * ported from file watchit-NetDisk.php
- * 2022-07-12 W.N. first commit
- * 2022-08-24 W.N. add debugger to CheckValue
+ * last update: 2022-09-05 changed setNoData() to force UNKNOWN
  */
 require_once("/opt/watchit/sources/php/vendor/autoload.php");
 
@@ -52,13 +51,13 @@ try {
     $snmp->setDebug($debug);
     $snmpStorageData = $snmp->getStorageTable();
 } catch (Exception $e) {
-    $storageTable->setNoData(['Text' => $e->getMessage(), 'Exit' => 3, 'State' => 'UNKNOWN']);
+    $storageTable->setNoData(['Text' => $e->getMessage()]);
     $storageTable->bye();
 }
 
 // under normal working conditions this should never occur
 if (count($snmpStorageData) < 1) {
-    $storageTable->setNoData(['Text' => 'no raw data from SNMP', 'Exit' => 3, 'State' => 'UNKNOWN']);
+    $storageTable->setNoData(['Text' => 'no raw data from SNMP']);
     $storageTable->bye();
 }
 
