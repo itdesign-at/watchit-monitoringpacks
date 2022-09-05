@@ -107,6 +107,9 @@ foreach ($snmpStorageData as $storageEntry) {
         continue;
     }
 
+    // update the entry with the modified description
+    $storageEntry['Description'] = $description;
+
     $th = FilterThreshold::getThreshold(['h' => $host, 's' => $description, 'section' => $section]);
 
     $cv = new CheckValue(['Debug' => $debug]);
