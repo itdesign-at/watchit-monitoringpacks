@@ -68,6 +68,10 @@ if ($includeFilter === '') {
     $includeFilter = 'ON';
 }
 
+if ($debug) {
+    CheckValue::dbg("Main", "includeFilter", $includeFilter);
+}
+
 // for a nice output
 $textTemplate = '@{Description} is @{State} (@{FreePercent}% free @{FreeReadable}@{FreeUnit}, @{UsedPercent}% used @{UsedReadable}@{UsedUnit})';
 
@@ -77,6 +81,9 @@ foreach ($snmpStorageData as $storageEntry) {
     $description = '';
     if (array_key_exists('Description', $storageEntry)) {
         $description = $storageEntry['Description'];
+        if ($debug) {
+            CheckValue::dbg("Main", "foreach", $description);
+        }
     }
 
     // check SNMP hrStorageType field which determines 'disk' or 'memory' dataset
@@ -111,6 +118,10 @@ foreach ($snmpStorageData as $storageEntry) {
     $storageEntry['Description'] = $description;
 
     $th = FilterThreshold::getThreshold(['h' => $host, 's' => $description, 'section' => $section]);
+
+    if ($debug) {
+        CheckValue::dbg("Main", "threshold", $th);
+    }
 
     $cv = new CheckValue(['Debug' => $debug]);
 
