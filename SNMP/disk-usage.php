@@ -8,7 +8,7 @@
  * Ubuntu 22.04 with PHP 8.1.2
  *
  * ported from file watchit-NetDisk.php
- * last update: 2022-09-05 changed setNoData() to force UNKNOWN
+ * last update: 2022-09-06 check $OPT['conf']
  */
 require_once("/opt/watchit/sources/php/vendor/autoload.php");
 
@@ -19,14 +19,16 @@ use ITdesign\Plugins\StorageTable;
 use ITdesign\Utils\CommandLine;
 use ITdesign\Utils\FilterThreshold;
 
-if (str_contains($argv[0], "disk")) {
-    $section = "disk";
-} else {
-    $section = "memory";
-}
-
 if (!isset($OPT)) {
     $OPT = CommandLine::getCommandLineOptions($argv);
+}
+
+// check if called via -conf <package file> or directly
+// must be named "disk-*.php" like "disk-usage.php", memory could be a symlink
+if (str_contains($OPT['conf'] ?? '','disk') || str_contains($argv[0], 'disk')) {
+    $section = 'disk';
+} else {
+    $section = 'memory';
 }
 
 $host = $OPT['h'] ?? '';
