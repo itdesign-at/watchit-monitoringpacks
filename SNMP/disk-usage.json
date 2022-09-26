@@ -1,7 +1,6 @@
 {
-   "description" : "read hrStorage MIB",
+   "description" : "Read disks/memory datasets voa SNMP from hrStorage MIB",
    "dialect" : "php",
    "module" : "Basic",
-   "rule" : "[{\"section\":\"Net.cpuload.LoadAverage\",\"operator\":\"regex\",\"value\":\"d+\",\"parameter\":\"\"}]",
    "service" : "disk-usage"
 }

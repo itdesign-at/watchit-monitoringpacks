@@ -8,7 +8,6 @@
  * Ubuntu 22.04 with PHP 8.1.2
  *
  * ported from file watchit-NetDisk.php
- * last update: 2022-09-06 check $OPT['conf']
  */
 require_once("/opt/watchit/sources/php/vendor/autoload.php");
 
@@ -25,8 +24,9 @@ if (!isset($OPT)) {
 
 // check if called via -conf <package file> or directly
 // must be named "disk-*.php" like "disk-usage.php", memory could be a symlink
-if (str_contains($OPT['conf'] ?? '','disk') || str_contains($argv[0], 'disk')) {
+if (str_contains($OPT['conf'] ?? '', 'disk') || str_contains($argv[0], 'disk')) {
     $section = 'disk';
+
 } else {
     $section = 'memory';
 }
@@ -46,22 +46,25 @@ $storageTable->setDebug($debug);
 
 // read raw data into $snmpStorageData
 $snmpStorageData = [];
-try {
-    // param $host only, snmp data are read from the json exported file
-    // hides security relevant params like community string, etc.
-    $snmp = new Snmp($host);
-    $snmp->setDebug($debug);
-    $snmpStorageData = $snmp->getStorageTable();
-} catch (Exception $e) {
-    $storageTable->setNoData(['Text' => $e->getMessage()]);
+
+$snmp = new Snmp($host);
+$snmp->setDebug($debug);
+$snmpStorageData = $snmp->getStorageTable();
+
+$n = count($snmpStorageData);
+
+if ($n < 1) {
+    $storageTable->setNoData(['Text' => 'no SNMP data']);
     $storageTable->bye();
+}
+if ($n > 1) {
+    if ($section == "disk") {
+        $storageTable->set('OkText', sprintf('%d Disks/Partitions OK', $n));
+    } else {
+        $storageTable->set('OkText', 'Memory OK');
+    }
 }
 
-// under normal working conditions this should never occur
-if (count($snmpStorageData) < 1) {
-    $storageTable->setNoData(['Text' => 'no raw data from SNMP']);
-    $storageTable->bye();
-}
 
 // set to 'ON' when no include filter is configured. Plugin::compare returns
 // true when the $includeFilter parameter == 'ON' (means take every dataset).
@@ -71,7 +74,7 @@ if ($includeFilter === '') {
 }
 
 if ($debug) {
-    CheckValue::dbg("Main", "includeFilter", $includeFilter);
+    CheckValue::dbg('Main', 'includeFilter', $includeFilter);
 }
 
 // for a nice output
