@@ -13,10 +13,13 @@ require_once("/opt/watchit/sources/php/vendor/autoload.php");
 
 use ITdesign\Net\Snmp;
 use ITdesign\Plugins\CheckValue;
+use ITdesign\Plugins\Constants;
 use ITdesign\Plugins\Plugin;
 use ITdesign\Plugins\StorageTable;
 use ITdesign\Utils\CommandLine;
 use ITdesign\Utils\FilterThreshold;
+
+const Description = 'Description';
 
 if (!isset($OPT)) {
     $OPT = CommandLine::getCommandLineOptions($argv);
@@ -26,15 +29,21 @@ if (!isset($OPT)) {
 // must be named "disk-*.php" like "disk-usage.php", memory could be a symlink
 if (str_contains($OPT['conf'] ?? '', 'disk') || str_contains($argv[0], 'disk')) {
     $section = 'disk';
-
 } else {
     $section = 'memory';
 }
 
+// option -h is a must -> reference to hosts-exported.json
 $host = $OPT['h'] ?? '';
 if ($host === '') {
     print "host is empty or missing\n";
     exit(3);
+}
+
+// -k is a must -> set a good default when missing
+$key = $OPT['k'] ?? '';
+if ($key === '') {
+    $OPT['k'] = 'storageTable';
 }
 
 $debug = $OPT['Debug'] ?? false;
@@ -54,14 +63,18 @@ $snmpStorageData = $snmp->getStorageTable();
 $n = count($snmpStorageData);
 
 if ($n < 1) {
-    $storageTable->setNoData(['Text' => 'no SNMP data']);
+    // construct a syntactical storage table with one UNKNOWN entry which
+    // forces to write "NoData" to the broker
+    $storageTable->table = [[Constants::Exit => 3, Constants::UnknownText => "no SNMP data"]];
+
+    // terminate program with UNKNOWN
     $storageTable->bye();
 }
 if ($n > 1) {
     if ($section == "disk") {
-        $storageTable->set('OkText', sprintf('%d Disks/Partitions OK', $n));
+        $storageTable->set(Constants::OkText, sprintf('%d Disks/Partitions OK', $n));
     } else {
-        $storageTable->set('OkText', 'Memory OK');
+        $storageTable->set(Constants::OkText, 'Memory OK');
     }
 }
 
@@ -74,7 +87,7 @@ if ($includeFilter === '') {
 }
 
 if ($debug) {
-    CheckValue::dbg('Main', 'includeFilter', $includeFilter);
+    CheckValue::dbg(__FILE__, __FUNCTION__, $includeFilter);
 }
 
 // for a nice output
@@ -84,10 +97,10 @@ foreach ($snmpStorageData as $storageEntry) {
 
     // contains disk or memory description like "/usr" or "Swap space"
     $description = '';
-    if (array_key_exists('Description', $storageEntry)) {
-        $description = $storageEntry['Description'];
+    if (array_key_exists(Description, $storageEntry)) {
+        $description = $storageEntry[Description];
         if ($debug) {
-            CheckValue::dbg("Main", "foreach", $description);
+            CheckValue::dbg(__FILE__, __FUNCTION__, $description);
         }
     }
 
@@ -120,12 +133,12 @@ foreach ($snmpStorageData as $storageEntry) {
     }
 
     // update the entry with the modified description
-    $storageEntry['Description'] = $description;
+    $storageEntry[Description] = $description;
 
     $th = FilterThreshold::getThreshold(['h' => $host, 's' => $description, 'section' => $section]);
 
     if ($debug) {
-        CheckValue::dbg("Main", "threshold", $th);
+        CheckValue::dbg(__FILE__, __FUNCTION__, $th);
     }
 
     $cv = new CheckValue(['Debug' => $debug]);
@@ -136,16 +149,19 @@ foreach ($snmpStorageData as $storageEntry) {
         's' => "$description",
         'w' => $th['w'],
         'c' => $th['c'],
-        'Text' => $storageEntry['Summary'] ?? 'Summary not set',
-        'WarningText' => $textTemplate,
-        'CriticalText' => $textTemplate,
+        Constants::Text => $storageEntry['Summary'] ?? 'Summary not set',
+        Constants::WarningText => $textTemplate,
+        Constants::CriticalText => $textTemplate,
     ]);
 
-    // init() does the comparison logic
+    // init() does the comparison logic and sets Text, etc.
     $cv->init();
 
+    // get uppercase keys only
+    $data = $cv->getData();
+
     // add all key/values from CheckValue to the table
-    $storageTable->add($cv->getMacros());
+    $storageTable->add($data);
 }
 
 $storageTable->bye();
