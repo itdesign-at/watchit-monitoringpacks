@@ -1,0 +1,6 @@
+{
+   "description" : "Read disks/memory datasets voa SNMP from hrStorage MIB",
+   "dialect" : "php",
+   "module" : "Basic",
+   "service" : "memory"
+}
