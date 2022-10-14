@@ -1,0 +1,6 @@
+{
+   "description" : "Read OS description from sysDescr and uptime from sysUpTime",
+   "dialect" : "php",
+   "module" : "Basic",
+   "service" : "system-info"
+}

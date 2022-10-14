@@ -1,5 +1,5 @@
 {
-   "description" : "Read memory datasets via SNMP from hrStorage MIB",
+   "description" : "Read memory datasets from hrStorage MIB",
    "dialect" : "php",
    "module" : "Basic",
    "service" : "memory"

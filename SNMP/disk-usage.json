@@ -1,5 +1,5 @@
 {
-   "description" : "Read disks/volumes via SNMP from hrStorage MIB",
+   "description" : "Read disks/volumes from hrStorage MIB",
    "dialect" : "php",
    "module" : "Basic",
    "service" : "disk-usage"
