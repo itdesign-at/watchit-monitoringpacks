@@ -40,6 +40,12 @@ if ($host === '') {
     exit(3);
 }
 
+// -k is a must -> set a good default when missing
+$key = $OPT['k'] ?? '';
+if ($key === '') {
+    $OPT['k'] = StorageTable::MetricType;
+}
+
 $debug = $OPT['Debug'] ?? false;
 
 // $storageTable collects all storage entries, used at the
