@@ -7,6 +7,7 @@ use ITdesign\Plugins\CheckValue;
 use ITdesign\Plugins\Constants;
 use ITdesign\Plugins\StateCorrelation;
 use ITdesign\Utils\CommandLine;
+use ITdesign\Utils\Common;
 
 const binary = "/opt/watchit/bin/osDetection";
 
@@ -41,15 +42,14 @@ if ($data === null) {
 
 // correlation table init
 $correlation = new StateCorrelation([
-    'k' => StateCorrelation::MetricType,
-    'h' => $host,
-    's' => $service,
+    'k' => Constants::MetricCorrelation,
+    'h' => $host, 's' => $service,
     'Debug' => $debug]);
 
 // convert json keys to nice names
 $textMapper = [
     'vendorName' => 'Vendor',
-    'operatingSystemName' => 'OS',
+    'operatingSystemName' => 'Operating System',
     'description' => 'Description'
 ];
 
@@ -57,33 +57,37 @@ foreach (['vendorName', 'operatingSystemName', 'description'] as $key) {
     if (!array_key_exists($key, $data)) {
         continue;
     }
-    $value = $data[$key];
-    if ($service === '') {
-        $cv = new CheckValue([
-            'h' => $host, 'Value' => "$value", 'Debug' => $debug,
-            'Text' => sprintf('%s: %s', $textMapper[$key], $value),
-        ]);
-    } else {
-        $cv = new CheckValue([
-            'h' => $host, 's' => "$service - $key", 'Value' => "$value", 'Debug' => $debug,
-            'Text' => sprintf('%s: %s', $textMapper[$key], $value),
-        ]);
+
+    $svc = $textMapper[$key];
+    $val = $data[$key];
+
+    if (str_contains($val, 'UNKNOWN')) {
+        continue;
     }
 
+    // do not give 'k' as parameter -> avoids writing long term data
+    $cv = new CheckValue(['h' => $host, 's' => $svc, 'Text' => $val, 'Debug' => $debug]);
     $correlation->add($cv);
+    $correlation->arrayAppend(Constants::Text, $cv->getText());
+
+    // do not write "Description" when "Operating System" is already printed
+    // it is more readable for the customer
+    if ($key == 'operatingSystemName') {
+	    break;
+    }
 }
 
 if (array_key_exists("uptime", $data)) {
-    if ($service === '') {
-        $cv = new CheckValue([
-            'k' => 'counter', 'h' => $host,
-            'Value' => $data['uptime'], 'Debug' => $debug]);
-    } else {
-        $cv = new CheckValue([
-            'k' => 'counter', 'h' => $host, 's' => "$service - uptime",
-            'Value' => $data['uptime'], 'Debug' => $debug]);
-    }
-
+    $uptime = $data['uptime']; // just a shortcut
+    $cv = new CheckValue([
+        'k' => Constants::MetricCounter, 'h' => $host, 's' => "SNMP Uptime",
+        'Text' => "SNMP Uptime: " . Common::seconds2Readable($uptime),
+        'Value' => $uptime, 'Debug' => $debug]);
     $correlation->add($cv);
+    $correlation->arrayAppend(Constants::Text, $cv->getText());
 }
-$correlation->bye();
+
+$correlation->commit();
+print ($correlation->args['Output'] . "\n");
+exit(0);
+
