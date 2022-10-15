@@ -43,7 +43,7 @@ if ($host === '') {
 // -k is a must -> set a good default when missing
 $key = $OPT['k'] ?? '';
 if ($key === '') {
-    $OPT['k'] = StorageTable::MetricType;
+    $OPT['k'] = Constants::MetricStorageTable;
 }
 
 $debug = $OPT['Debug'] ?? false;
