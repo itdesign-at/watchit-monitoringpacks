@@ -1,8 +1,17 @@
 #!/usr/bin/env php
 <?php
+/**
+ *
+ * Read sysDescr from OID .1.3.6.1.2.1.1.1.0 and sysUptime with the
+ * osDetection binary and compares the result against
+ * /opt/watchit/var/etc/os-detection.json. The "oid" parameter from
+ * osDetection allows to specify an alternative oid to use.
+ *
+ * SNMP config params are taken from hosts-exported.json.
+ *
+ */
 require_once("/opt/watchit/sources/php/vendor/autoload.php");
 
-use ITdesign\Net\Snmp;
 use ITdesign\Plugins\CheckValue;
 use ITdesign\Plugins\Constants;
 use ITdesign\Plugins\StateCorrelation;
@@ -11,8 +20,6 @@ use ITdesign\Utils\Common;
 
 const binary = "/opt/watchit/bin/osDetection";
 
-// allow to call the script directly without state_correlation.php by
-// checking $OPT
 if (!isset($OPT)) {
     $OPT = CommandLine::getCommandLineOptions($argv);
 }
@@ -26,17 +33,22 @@ if ($host === '') {
 $service = $OPT['s'] ?? '';
 $debug = $OPT['Debug'] ?? false;
 
-// e.g. /opt/watchit/bin/osDetection -h dev-dc-01 -oF json
-// {"description":"Hardware: Intel64 Family 6 Model ...","deviceTypeId":"zBBeAFKt",
-// "operatingSystemName":"Windows Server 2012 R2","uptime":15708721,"vendorId"","vendorName":"Microsoft"}
-exec(binary . " -h \"$host\" -oF json", $out, $exit);
+// init only
+$cvUptime = new CheckValue([
+    'k' => Constants::MetricCounter, 'h' => $host, 's' => "Uptime", 'Debug' => $debug,
+]);
+
+// e.g. /opt/watchit/bin/osDetection -h dev-dc-01 -oid .1.3.6.1.2.1.1.1.0  -oF json
+exec(binary . " -h \"$host\" -oid .1.3.6.1.2.1.1.1.0 -oF json", $out, $exit);
 if (count($out) != 1) {
-    print ("unable to get data via SNMP");
+    // missing "Value" -> writes "NoData" in the backend
+    $cvUptime->commit();
+    print ("unable to get data via SNMP\n");
     exit(3);
 }
 $data = json_decode($out[0], true);
 if ($data === null) {
-    print ("unable to json_decode output");
+    print ("unable to json_decode output\n");
     exit(3);
 }
 
@@ -73,21 +85,26 @@ foreach (['vendorName', 'operatingSystemName', 'description'] as $key) {
     // do not write "Description" when "Operating System" is already printed
     // it is more readable for the customer
     if ($key == 'operatingSystemName') {
-	    break;
+        break;
     }
 }
 
 if (array_key_exists("uptime", $data)) {
     $uptime = $data['uptime']; // just a shortcut
-    $cv = new CheckValue([
-        'k' => Constants::MetricCounter, 'h' => $host, 's' => "SNMP Uptime",
-        'Text' => "Uptime: " . Common::seconds2Readable($uptime),
-        'Value' => $uptime, 'Debug' => $debug]);
-    $correlation->add($cv);
-    $correlation->arrayAppend(Constants::Text, $cv->getText());
+    $cvUptime->add(['Text' => "Uptime: " . Common::seconds2Readable($uptime),
+        'Value' => $uptime]);
+
+    $correlation->add($cvUptime);
+    $correlation->arrayAppend(Constants::Text, $cvUptime->getText());
 }
 
 $correlation->commit();
-print ($correlation->args['Output'] . "\n");
+if (array_key_exists('Output', $correlation->args) && is_string($correlation->args['Output'])) {
+    print ($correlation->args['Output']);
+} else {
+    $allTextLines = $correlation->args[Constants::Text];
+    print(implode(",", $allTextLines));
+}
+print "\n";
 exit(0);
 
