@@ -81,7 +81,7 @@ if (array_key_exists("uptime", $data)) {
     $uptime = $data['uptime']; // just a shortcut
     $cv = new CheckValue([
         'k' => Constants::MetricCounter, 'h' => $host, 's' => "SNMP Uptime",
-        'Text' => "SNMP Uptime: " . Common::seconds2Readable($uptime),
+        'Text' => "Uptime: " . Common::seconds2Readable($uptime),
         'Value' => $uptime, 'Debug' => $debug]);
     $correlation->add($cv);
     $correlation->arrayAppend(Constants::Text, $cv->getText());
