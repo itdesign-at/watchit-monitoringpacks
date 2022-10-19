@@ -141,7 +141,7 @@ foreach ($snmpStorageData as $storageEntry) {
         CheckValue::dbg(__FILE__, __FUNCTION__, $th);
     }
 
-    $cv = new CheckValue(['Debug' => $debug]);
+    $cv = new CheckValue(['k' => 'storageEntry', 'Debug' => $debug]);
 
     $cv->add($storageEntry);
     $cv->add([
