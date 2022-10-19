@@ -46,6 +46,8 @@ if ($key === '') {
     $OPT['k'] = Constants::MetricStorageTable;
 }
 
+$service = $OPT['s'] ?? $section;
+
 $debug = $OPT['Debug'] ?? false;
 
 // $storageTable collects all storage entries, used at the
@@ -146,7 +148,7 @@ foreach ($snmpStorageData as $storageEntry) {
     $cv->add($storageEntry);
     $cv->add([
         'h' => "$host",
-        's' => "$description",
+        's' => "$service",
         'w' => $th['w'],
         'c' => $th['c'],
         Constants::Text => $storageEntry['Summary'] ?? 'Summary not set',
