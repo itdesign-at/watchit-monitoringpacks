@@ -34,5 +34,7 @@ $snmp->setDebug($debug);
 $cpuLoad = $snmp->getCpuLoad("summary");
 if (is_array($cpuLoad) && count($cpuLoad) > 0) {
     $cv->add($cpuLoad);
+} else {
+    $cv->add([Constants::Text => 'no SNMP data', Constants::State => Constants::UNKNOWN]);
 }
 $cv->bye();
