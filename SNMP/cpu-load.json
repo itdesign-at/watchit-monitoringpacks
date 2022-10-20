@@ -1,5 +1,5 @@
 {
-   "description" : "Read hrProcessorLoad and calculate the average",
+   "description" : "Read hrProcessorLoad and calculate average",
    "dialect" : "php",
    "module" : "Basic",
    "service" : "cpu-load"
