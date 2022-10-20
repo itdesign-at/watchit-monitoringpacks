@@ -16,16 +16,20 @@ $keyword = $OPT['k'] ?? 'cpu-load';
 $host = $OPT['h'] ?? '';
 $service = $OPT['s'] ?? '';
 $debug = $OPT['Debug'] ?? false;
+$convertUnknown = $OPT['convertUnknown'] ?? false;
 
 if ($host === '') {
     print "host is empty or missing\n";
+    if ($convertUnknown) {
+    	exit(2);
+    }
     exit(3);
 }
 
 $th = FilterThreshold::getThreshold(array('h' => $host, 'section' => 'cpu'));
 $cv = new CheckValue([
         'k' => $keyword, 'h' => $host, 's' => "$service",
-        'w' => $th['w'], 'c' => $th['c'],
+        'w' => $th['w'], 'c' => $th['c'], 'convertUnknown' => $convertUnknown,
         'Debug' => $debug]
 );
 
