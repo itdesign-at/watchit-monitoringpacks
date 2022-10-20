@@ -12,7 +12,7 @@ if (!isset($OPT)) {
     $OPT = CommandLine::getCommandLineOptions($argv);
 }
 
-$keyword = $OPT['k'] ?? Constants::MetricGauge;
+$keyword = $OPT['k'] ?? 'cpu-load';
 $host = $OPT['h'] ?? '';
 $service = $OPT['s'] ?? '';
 $debug = $OPT['Debug'] ?? false;
@@ -32,7 +32,7 @@ $cv = new CheckValue([
 $snmp = new Snmp($host);
 $snmp->setDebug($debug);
 $cpuLoad = $snmp->getCpuLoad("summary");
-if (is_array($cpuLoad) && count($cpuLoad) == 2) {
+if (is_array($cpuLoad) && count($cpuLoad) > 0) {
     $cv->add($cpuLoad);
 }
 $cv->bye();
