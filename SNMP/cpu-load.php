@@ -29,7 +29,7 @@ if ($host === '') {
 $th = FilterThreshold::getThreshold(array('h' => $host, 'section' => 'cpu'));
 $cv = new CheckValue([
         'k' => $keyword, 'h' => $host, 's' => "$service",
-        'w' => $th['w'], 'c' => $th['c'], 'convertUnknown' => $convertUnknown,
+        'w' => $th['w'], 'c' => $th['c'], 
         'Debug' => $debug]
 );
 
@@ -39,6 +39,11 @@ $cpuLoad = $snmp->getCpuLoad("summary");
 if (is_array($cpuLoad) && count($cpuLoad) > 0) {
     $cv->add($cpuLoad);
 } else {
-    $cv->add([Constants::Text => 'no SNMP data', Constants::State => Constants::UNKNOWN]);
+    $cv->add([Constants::Text => 'no SNMP data']);
+    if ($convertUnknown) {
+    	$cv->add([Constants::State => Constants::CRITICAL]);
+    } else {
+    	$cv->add([Constants::State => Constants::UNKNOWN]);
+    }
 }
 $cv->bye();
