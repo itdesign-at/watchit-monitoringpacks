@@ -1,0 +1,6 @@
+{
+   "description" : "ping a host with ICMP using the ping command",
+   "dialect" : "php",
+   "module" : "Basic",
+   "service" : "ping"
+}
