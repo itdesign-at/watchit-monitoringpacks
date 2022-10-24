@@ -38,7 +38,7 @@ $cmd = sprintf("%s -k %s -h '%s' -s '%s' -a '%s' -oF json",
 
 if ($debug) {
     $cmd .= " -Debug";
-    CheckValue::dbg("main", "main", $cmd);
+    CheckValue::dbg("main", "cmd", $cmd);
 }
 
 $data = [];
