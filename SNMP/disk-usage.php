@@ -33,27 +33,23 @@ if (str_contains($OPT['conf'] ?? '', 'disk') || str_contains($argv[0], 'disk')) 
     $section = 'memory';
 }
 
-// option -h is a must -> reference to hosts-exported.json
+$keyword = $OPT['k'] ?? Constants::MetricStorageTable;;
 $host = $OPT['h'] ?? '';
+$service = $OPT['s'] ?? $section;
+$debug = $OPT['Debug'] ?? false;
+$convertUnknown = $OPT['convertUnknown'] ?? false;
+
 if ($host === '') {
     print "host is empty or missing\n";
-    exit(3);
+    if ($convertUnknown) {
+        exit(Constants::NUMERIC_CRITICAL);
+    }
+    exit(Constants::NUMERIC_UNKNOWN);
 }
-
-// -k is a must -> set a good default when missing
-$key = $OPT['k'] ?? '';
-if ($key === '') {
-    $OPT['k'] = Constants::MetricStorageTable;
-}
-
-$service = $OPT['s'] ?? $section;
-
-$debug = $OPT['Debug'] ?? false;
 
 // $storageTable collects all storage entries, used at the
 // end to publish data and get a console output
-$storageTable = new StorageTable($OPT);
-$storageTable->setDebug($debug);
+$storageTable = new StorageTable(['k' => $keyword, 'h' => $host, 's' => $service, 'Debug' => $debug]);
 
 // read raw data into $snmpStorageData
 $snmpStorageData = [];
@@ -67,11 +63,19 @@ $n = count($snmpStorageData);
 if ($n < 1) {
     // construct a syntactical storage table with one UNKNOWN entry which
     // forces to write "NoData" to the broker
-    $storageTable->table = [[Constants::Exit => 3, Constants::UnknownText => "no SNMP data"]];
-
-    // terminate program with UNKNOWN
-    $storageTable->bye();
+    $storageTable->table = [
+        [
+            Constants::Exit => Constants::NUMERIC_UNKNOWN,
+            Constants::UnknownText => $OPT[Constants::UnknownText] ?? "no SNMP data",
+        ]
+    ];
+    $storageTable->bye(['stay' => true]);
+    if ($convertUnknown) {
+        exit(Constants::NUMERIC_CRITICAL);
+    }
+    exit(Constants::NUMERIC_UNKNOWN);
 }
+
 if ($n > 1) {
     if ($section == "disk") {
         $storageTable->set(Constants::OkText, sprintf('%d Disks/Partitions OK', $n));
