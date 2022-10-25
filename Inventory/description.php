@@ -18,12 +18,12 @@ if ($host === '') {
 $content = file_get_contents(f);
 if ($content === false) {
     printf("unable to load %s\n", f);
-    exit(3);
+    exit(Constants::NUMERIC_UNKNOWN);
 }
 $data = json_decode($content, true);
 if ($data === null) {
     printf("unable to json_decode %s\n", f);
-    exit(3);
+    exit(Constants::NUMERIC_UNKNOWN);
 }
 if (!array_key_exists($host, $data)) {
     printf("host '%s' not found in file '%s'\n", $host, f);
