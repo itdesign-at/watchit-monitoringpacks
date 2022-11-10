@@ -76,15 +76,6 @@ if ($n < 1) {
     exit(Constants::NUMERIC_UNKNOWN);
 }
 
-if ($n > 1) {
-    if ($section == "disk") {
-        $storageTable->set(Constants::OkText, sprintf('%d Disks/Partitions OK', $n));
-    } else {
-        $storageTable->set(Constants::OkText, 'Memory OK');
-    }
-}
-
-
 // set to 'ON' when no include filter is configured. Plugin::compare returns
 // true when the $includeFilter parameter == 'ON' (means take every dataset).
 $includeFilter = FilterThreshold::getIncludeFilter(['h' => $host, 'section' => $section]);
@@ -169,6 +160,25 @@ foreach ($snmpStorageData as $storageEntry) {
     // add all key/values from CheckValue to the table
     $storageTable->add($data);
 }
+
+// nice OK Text
+$n = count($storageTable->table);
+if ($n == 1) {
+    if ($section == "disk") {
+        $storageTable->set(Constants::OkText, "1 Disk/Partition OK");
+    } else {
+        $storageTable->set(Constants::OkText, '1 Memory entry OK');
+    }
+} else if ($n > 1) {
+    if ($section == "disk") {
+        $storageTable->set(Constants::OkText, sprintf('%d Disks/Partitions OK', $n));
+    } else {
+        $storageTable->set(Constants::OkText, sprintf('%d Memory entries OK', $n));
+    }
+} else {
+    $storageTable->set(Constants::OkText, "no data in storageTable");
+}
+
 
 $storageTable->bye();
 
