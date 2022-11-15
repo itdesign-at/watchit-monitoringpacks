@@ -33,23 +33,16 @@ if (str_contains($OPT['conf'] ?? '', 'disk') || str_contains($argv[0], 'disk')) 
     $section = 'memory';
 }
 
-$keyword = $OPT['k'] ?? Constants::MetricStorageTable;;
 $host = $OPT['h'] ?? '';
 $service = $OPT['s'] ?? $section;
 $debug = $OPT['Debug'] ?? false;
 $convertUnknown = $OPT['convertUnknown'] ?? false;
 
-if ($host === '') {
-    print "host is empty or missing\n";
-    if ($convertUnknown) {
-        exit(Constants::NUMERIC_CRITICAL);
-    }
-    exit(Constants::NUMERIC_UNKNOWN);
-}
+CommandLine::checkEmptyHost($host);
 
 // $storageTable collects all storage entries, used at the
 // end to publish data and get a console output
-$storageTable = new StorageTable(['k' => $keyword, 'h' => $host, 's' => $service, 'Debug' => $debug]);
+$storageTable = new StorageTable(['h' => $host, 's' => $service, 'Debug' => $debug]);
 
 // read raw data into $snmpStorageData
 $snmpStorageData = [];

@@ -26,12 +26,10 @@ if (!isset($OPT)) {
 
 // option -h is a must -> reference to hosts-exported.json
 $host = $OPT['h'] ?? '';
-if ($host === '') {
-    print "host is empty or missing\n";
-    exit(3);
-}
 $service = $OPT['s'] ?? '';
 $debug = $OPT['Debug'] ?? false;
+
+CommandLine::checkEmptyHost($host);
 
 // init only
 $cvUptime = new CheckValue([
@@ -43,9 +41,11 @@ exec(binary . " -h \"$host\" -oid .1.3.6.1.2.1.1.1.0 -oF json", $out, $exit);
 if (count($out) != 1) {
     // missing "Value" -> writes "NoData" in the backend
     $cvUptime->commit();
-    print ("unable to get data via SNMP\n");
-    exit(3);
+    $cvUptime->setUnknown($OPT['convertUnknown'] ?? false,
+        $OPT[Constants::UnknownText] ?? Constants::NoDataViaSNMP);
+    $cvUptime->bye();
 }
+
 $data = json_decode($out[0], true);
 if ($data === null) {
     print ("unable to json_decode output\n");

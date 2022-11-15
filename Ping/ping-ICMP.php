@@ -24,13 +24,7 @@ if ($address === '') {
     $address = $host;
 }
 
-if ($address === '') {
-    print "host/address is empty or missing\n";
-    if ($convertUnknown) {
-        exit(Constants::NUMERIC_CRITICAL);
-    }
-    exit(Constants::NUMERIC_UNKNOWN);
-}
+CommandLine::checkEmptyHost($address);
 
 $cmd = sprintf("%s -k %s -h '%s' -s '%s' -a '%s' -oF json",
     binary, $keyword, $host, $service, $address
