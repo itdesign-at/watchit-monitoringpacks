@@ -59,7 +59,7 @@ if ($n < 1) {
     $storageTable->table = [
         [
             Constants::Exit => Constants::NUMERIC_UNKNOWN,
-            Constants::UnknownText => $OPT[Constants::UnknownText] ?? "no SNMP data",
+            Constants::UnknownText => $OPT[Constants::UnknownText] ?? Constants::NoDataViaSNMP,
         ]
     ];
     $storageTable->bye(['stay' => true]);
