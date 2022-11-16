@@ -17,15 +17,8 @@ $keyword = $OPT['k'] ?? 'gauge';
 $host = $OPT['h'] ?? '';
 $service = $OPT['s'] ?? '';
 $debug = $OPT['Debug'] ?? false;
-$convertUnknown = $OPT['convertUnknown'] ?? false;
 
-if ($host === '') {
-    print "host is empty or missing\n";
-    if ($convertUnknown) {
-        exit(Constants::NUMERIC_CRITICAL);
-    }
-    exit(Constants::NUMERIC_UNKNOWN);
-}
+CommandLine::checkEmptyHost($host);
 
 $cv = new CheckValue(['k' => "$keyword", 'h' => "$host", 's' => "$service", 'Debug' => $debug]);
 
@@ -40,11 +33,10 @@ try {
 $snmp = new Snmp("$host");
 $remoteTimestamp = $snmp->getTime();
 if ($remoteTimestamp === $snmp::$ERROR) {
-    print "no SNMP data\n";
-    if ($convertUnknown) {
-        exit(Constants::NUMERIC_CRITICAL);
-    }
-    exit(Constants::NUMERIC_UNKNOWN);
+    $cv->commit();
+    $cv->setUnknown($OPT['convertUnknown'] ?? false,
+        $OPT[Constants::UnknownText] ?? Constants::NoDataViaSNMP);
+    $cv->bye();
 }
 
 // localtime
