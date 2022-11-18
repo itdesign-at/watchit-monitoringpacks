@@ -1,0 +1,6 @@
+{
+   "description" : "Send data via NATS and retrieve it via Rest API from ODIN",
+   "dialect" : "php",
+   "module" : "Basic",
+   "service" : "NATS and ODIN round trip check"
+}
