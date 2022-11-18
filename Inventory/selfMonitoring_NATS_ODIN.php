@@ -38,6 +38,9 @@ if (count($fromApi) == 1) {
     print "NATS publishing failed ($shellCommand)\n";
     exit(Constants::NUMERIC_CRITICAL);
 }
+if ($debug) {
+    fwrite(STDERR, "curl -k '$url'" . "\n");
+}
 
 // Get the file back via REST API
 $ch = curl_init();
@@ -59,6 +62,10 @@ curl_close($ch);
 if ($now === $fromApi) {
     print "NATS and ODIN service are OK\n";
     exit(Constants::NUMERIC_OK);
+}
+
+if ($debug) {
+    var_dump($fromApi);
 }
 
 print "NATS or ODIN service error\n";
