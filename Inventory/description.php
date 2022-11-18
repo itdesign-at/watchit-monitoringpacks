@@ -11,10 +11,8 @@ if (!isset($OPT)) {
     $OPT = CommandLine::getCommandLineOptions($argv);
 }
 $host = $OPT['h'] ?? '';
-if ($host === '') {
-    print "host is empty or missing\n";
-    exit(Constants::NUMERIC_UNKNOWN);
-}
+CommandLine::checkEmptyHost($host);
+
 $content = file_get_contents(f);
 if ($content === false) {
     printf("unable to load %s\n", f);

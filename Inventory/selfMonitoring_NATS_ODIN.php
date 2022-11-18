@@ -13,7 +13,7 @@ if (!isset($OPT)) {
     $OPT = CommandLine::getCommandLineOptions($argv);
 }
 
-$now = date('Y-m-y h:i:s');
+$now = date('Y-m-d h:i:s');
 
 $host = $OPT['h'] ?? '';
 $service = $OPT['s'] ?? 'NATS and ODIN round trip check';
