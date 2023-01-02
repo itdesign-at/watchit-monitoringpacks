@@ -76,7 +76,10 @@ if ($host === '') {
 
 $service = $OPT['s'] ?? '';
 $debug = $OPT['Debug'] ?? false;
-$convertUnknown = $OPT['convertUnknown'] ?? false;
+
+// WN: convert UNKNOWN ist nicht implementiert; sobald der Download schief geht ist
+// es immer CRITICAL!
+// $convertUnknown = $OPT['convertUnknown'] ?? false;
 
 /* all parameters can be configured in a json string */
 $jsonConfig = Common::getMonitoringPackParameter(array_merge($OPT, array(
@@ -116,8 +119,15 @@ if (!array_key_exists('Critical_Time', $config)) {
         )));
 }
 
-$correlation = new StateCorrelation(['h' => "$host", 's' => "$service", 'Debug' => $debug]);
+// optional content string to search for
+$contentToCheck = $config['Download_Content'];
 
+// service definitions for CheckValue
+$serviceDownload = $config['Download_URL'] . ' download';
+$serviceDownloadTime = $config['Download_URL'] . ' downloadtime';
+$serviceContent = "Check content string '$contentToCheck'";
+
+// do the download now
 $t0 = microtime(TRUE);
 
 $ch = curl_init();
@@ -137,27 +147,48 @@ if ($exit == 0) {
 
 $downloadTime = sprintf('%.6f', $t1 - $t0);
 
-$checkValue = new CheckValue(array(
+$cvDownload = new CheckValue(array(
     'k' => 'binary', 'h' => $host,
-    's' => $config['Download_URL'] . ' download',
+    's' => $serviceDownload,
     'Text' => "Download $downloadStateText",
     'Value' => $downloadState == Constants::OK,
     'State' => $downloadState,
     'Debug' => $debug,
 ));
 
+
 // it does not make sense to continue when download fails
 if ($downloadState != Constants::OK) {
-    $checkValue->bye();
+    // force "NoData" to the download time statistic
+    $cvDownloadTime = new CheckValue(array(
+        'k' => 'gauge', 'h' => $host, 's' => $serviceDownloadTime,
+        'Text' => "Download failed", 'State' => Constants::CRITICAL,
+        'Debug' => $debug,
+    ));
+    $cvDownloadTime->init()->commit();
+
+    // force "NoData" to optional content check
+    if ($contentToCheck != "") {
+        $cvContent = new CheckValue(array(
+            'k' => 'binary', 'h' => $host, 's' => $serviceContent,
+            'Text' => "Download failed", 'State' => Constants::CRITICAL,
+            'Debug' => $debug,
+        ));
+        $cvContent->init()->commit();
+    }
+
+    $cvDownload->bye();
 }
 
-$checkValue->init()->commit();
-$correlation->add($checkValue->getData());
+// correlation table init
+$correlation = new StateCorrelation(['h' => "$host", 's' => "$service", 'Debug' => $debug]);
+
+$cvDownload->init()->commit();
+$correlation->add($cvDownload->getData());
 
 # ************ download time  ************
-$checkValue = new CheckValue(array(
-    'k' => 'gauge', 'h' => $host,
-    's' => $config['Download_URL'] . ' downloadtime',
+$cvDownloadTime = new CheckValue(array(
+    'k' => 'gauge', 'h' => $host, 's' => $serviceDownloadTime,
     'Text' => sprintf("Downloaded in %.2f ms", 1000 * $downloadTime),
     'w' => "$downloadTime > " . $config['Warning_Time'],
     'c' => "$downloadTime > " . $config['Critical_Time'],
@@ -165,31 +196,30 @@ $checkValue = new CheckValue(array(
     'Debug' => $debug,
 ));
 
-$checkValue->init()->commit();
-$correlation->add($checkValue->getData());
+$cvDownloadTime->init()->commit();
+$correlation->add($cvDownloadTime->getData());
 
 // test if content should be checked, too - otherwise we are finished
-$content = $config['Download_Content'];
-if ($content === '') {
+
+if ($contentToCheck === '') {
     $correlation->bye();
 }
 
 # ************ check WEB Content  ************
 $counter = substr_count($out, $config['Download_Content']);
 
-$checkValue = new CheckValue(array(
-    'k' => 'binary', 'h' => $host,
-    's' => "Check content string '$content'",
-    'OkText' => sprintf("String '%s' found %dx", $content, $counter),
-    'CriticalText' => "String '${content}' not found",
+$cvContent = new CheckValue(array(
+    'k' => 'binary', 'h' => $host, 's' => $serviceContent,
+    'OkText' => sprintf("String '%s' found %dx", $contentToCheck, $counter),
+    'CriticalText' => "String '${contentToCheck}' not found",
     'w' => 'OFF',
     'c' => "$counter < 1",
     'Value' => $counter > 0,
     'Debug' => $debug,
 ));
 
-$checkValue->init()->commit();
-$correlation->add($checkValue->getData());
+$cvContent->init()->commit();
+$correlation->add($cvContent->getData());
 
 $correlation->bye();
 
