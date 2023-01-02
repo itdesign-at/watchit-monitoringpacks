@@ -3,6 +3,14 @@
 /**
  * Download and check web content via PHP curl.
  * Ported 2023-01-02 from the SLES url download package.
+ *
+ * Pack parameters:
+ * ----------------
+ * Download_URL     string (defaults to https://<host>)
+ * Warning_Time     float in seconds (defaults to 3 seconds)
+ * Critical_Time    float in seconds (defaults to 10 seconds)
+ * Download_Content string (no default)
+ *
  */
 
 require_once("/opt/watchit/sources/php/vendor/autoload.php");
@@ -14,11 +22,9 @@ use ITdesign\Utils\CommandLine;
 use ITdesign\Utils\Common;
 
 /*
- * Attention!
- * ----------
  * This code allows to print the required json config to STDOUT. The string 
  * can than be used as package parameter 'JsonConfig' for configuring the 
- * package.
+ * package. It is an optional; each of the pack parameters can be set individually, too.
  *
  * Command line params:
  * -J ... force JsonConfig to be displayed to STDOUT
@@ -145,7 +151,7 @@ if ($downloadState != Constants::OK) {
     $checkValue->bye();
 }
 
-$checkValue->init();
+$checkValue->init()->commit();
 $correlation->add($checkValue->getData());
 
 # ************ download time  ************
@@ -159,7 +165,7 @@ $checkValue = new CheckValue(array(
     'Debug' => $debug,
 ));
 
-$checkValue->init();
+$checkValue->init()->commit();
 $correlation->add($checkValue->getData());
 
 // test if content should be checked, too - otherwise we are finished
@@ -182,7 +188,7 @@ $checkValue = new CheckValue(array(
     'Debug' => $debug,
 ));
 
-$checkValue->init();
+$checkValue->init()->commit();
 $correlation->add($checkValue->getData());
 
 $correlation->bye();
