@@ -24,7 +24,7 @@ if ($address === '') {
     $address = $host;
 }
 
-CommandLine::checkEmptyHost($address);
+CommandLine::terminateOnEmpty($address);
 
 $cmd = sprintf("%s -k %s -h '%s' -s '%s' -a '%s' -oF json",
     binary, $keyword, $host, $service, $address

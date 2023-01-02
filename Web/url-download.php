@@ -69,13 +69,10 @@ if (!isset($OPT)) {
 }
 
 $host = $OPT['h'] ?? '';
-if ($host === '') {
-    print "host is empty or missing\n";
-    exit(Constants::NUMERIC_UNKNOWN);
-}
-
 $service = $OPT['s'] ?? '';
 $debug = $OPT['Debug'] ?? false;
+
+
 
 // WN: convert UNKNOWN ist nicht implementiert; sobald der Download schief geht ist
 // es immer CRITICAL!

@@ -17,7 +17,7 @@ $host = $OPT['h'] ?? '';
 $service = $OPT['s'] ?? '';
 $debug = $OPT['Debug'] ?? false;
 
-CommandLine::checkEmptyHost($host);
+CommandLine::terminateOnEmpty($host);
 
 $th = FilterThreshold::getThreshold(array('h' => $host, 'section' => 'cpu'));
 $cv = new CheckValue([

@@ -19,7 +19,7 @@ $host = $OPT['h'] ?? '';
 $service = $OPT['s'] ?? 'NATS and ODIN round trip check';
 $debug = $OPT['Debug'] ?? false;
 
-CommandLine::checkEmptyHost($host);
+CommandLine::terminateOnEmpty($host);
 
 // store $now on the message broker defined in baseConfig.json
 $shellCommand = sprintf(

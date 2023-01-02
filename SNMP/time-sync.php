@@ -18,7 +18,7 @@ $host = $OPT['h'] ?? '';
 $service = $OPT['s'] ?? '';
 $debug = $OPT['Debug'] ?? false;
 
-CommandLine::checkEmptyHost($host);
+CommandLine::terminateOnEmpty($host);
 
 $cv = new CheckValue(['k' => "$keyword", 'h' => "$host", 's' => "$service", 'Debug' => $debug]);
 

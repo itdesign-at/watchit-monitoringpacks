@@ -34,11 +34,11 @@ if (str_contains($OPT['conf'] ?? '', 'disk') || str_contains($argv[0], 'disk')) 
 }
 
 $host = $OPT['h'] ?? '';
-$service = $OPT['s'] ?? $section;
+$service = $OPT['s'] ?? '';
 $debug = $OPT['Debug'] ?? false;
 $convertUnknown = $OPT['convertUnknown'] ?? false;
 
-CommandLine::checkEmptyHost($host);
+CommandLine::terminateOnEmpty($host);
 
 // $storageTable collects all storage entries, used at the
 // end to publish data and get a console output

@@ -11,7 +11,7 @@ if (!isset($OPT)) {
     $OPT = CommandLine::getCommandLineOptions($argv);
 }
 $host = $OPT['h'] ?? '';
-CommandLine::checkEmptyHost($host);
+CommandLine::terminateOnEmpty($host);
 
 $content = file_get_contents(f);
 if ($content === false) {
