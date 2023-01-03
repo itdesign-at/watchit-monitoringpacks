@@ -1,6 +1,0 @@
-{
-   "description" : "Check SSL certificate expiration of one host",
-   "dialect" : "php",
-   "module" : "Basic",
-   "service" : "SSL cert expiration"
-}
