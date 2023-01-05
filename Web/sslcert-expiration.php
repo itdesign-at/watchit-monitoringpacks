@@ -62,7 +62,6 @@ if ($host == $address || $address == "") {
     $cmd = sprintf("%s -h '%s' -a '%s' -p %s -out json", $binary, $host, $address, $tcpPort);
 }
 
-
 exec($cmd, $out, $exit);
 $data = json_decode($out[0], true);
 
@@ -139,7 +138,7 @@ if ($cn == '') {
     }
 }
 
-$cv->add(['Text' => "$text", 'Value' => $days, 'State' => $state,]);
+$cv->add(['Text' => "$text", 'Value' => $days, 'State' => $state]);
 $cv->bye();
 
 /**
