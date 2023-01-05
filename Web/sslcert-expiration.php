@@ -1,14 +1,35 @@
 #!/usr/bin/env php
 <?php
+/**
+ * Check SSL/TLS certificate for a dedicated host with the
+ * external program 'sslCertInfo'. Stores expiration days
+ * in the long term data store.
+ *
+ * Defaults:
+ *  TCP Port = 443
+ *  Warning threshold in days: 60
+ *  Critical threshold in days: 30
+ *
+ * 2023-01-03 first version, WN
+ * This version has no monitoring pack parameters; can be added later...
+ *
+ */
 
 require_once("/opt/watchit/sources/php/vendor/autoload.php");
 
 use ITdesign\Plugins\CheckValue;
 use ITdesign\Plugins\Constants;
 use ITdesign\Utils\CommandLine;
-use ITdesign\Utils\Common;
 
+// external binary to call
 $binary = "/opt/watchit/bin/sslCertInfo";
+
+// default = SSL/TLS
+$tcpPort = 443;
+
+// days of cert expiration
+$warning = 60;
+$critical = 30;
 
 if (!isset($OPT)) {
     $OPT = CommandLine::getCommandLineOptions($argv);
@@ -20,63 +41,105 @@ $service = $OPT['s'] ?? '';
 $convertUnknown = $OPT['convertUnknown'] ?? false;
 $debug = $OPT['Debug'] ?? false;
 
+CommandLine::terminateOnEmpty($host);
+
 if (!is_executable($binary)) {
     bye("$binary not found", $convertUnknown);
 }
+
 $errorState = Constants::UNKNOWN;
 if ($convertUnknown) {
     $errorState = Constants::CRITICAL;
 }
 
+// init a new measurement object
 $cv = new CheckValue(['k' => 'gauge', 'h' => $host, 's' => $service, 'Debug' => $debug]);
 
-// the external binary must return a valid json output
-$cmd = sprintf("%s -h '%s' -i '%s' -out json", $binary, $host, $address);
+// build external command with or without IP address
+if ($host == $address || $address == "") {
+    $cmd = sprintf("%s -h '%s' -p %s -out json", $binary, $host, $tcpPort);
+} else {
+    $cmd = sprintf("%s -h '%s' -a '%s' -p %s -out json", $binary, $host, $address, $tcpPort);
+}
+
+
 exec($cmd, $out, $exit);
 $data = json_decode($out[0], true);
 
+if ($debug) {
+    fwrite(STDERR, "\n$cmd\n\n");
+    fwrite(STDERR, print_r($data, true));
+}
+
 if ($exit != 0 || !is_array($data)) {
     $cv->add([
-        'Text' => 'Unable to read SSL certificate information',
+        'Text' => 'Unable to get certificate information',
         'State' => $errorState
     ]);
     $cv->bye();
 }
 
-// e.g. $expireInSeconds = 9409142
-$expireInSeconds = $data["SSL certificate expiration"] ?? -1;
+/**
+ * $data (as json) example:
+ * {
+ *  "Connection to": "8.8.8.8:443",
+ *  etc.
+ * },
+ *  "SSL certificate": {
+ *      "Expiration": 3977465,
+ *      "Expiration days": 46,
+ *      "From": "2022-11-28 08:19:04 +0000 UTC",
+ *      "To": "2023-02-20 08:19:03 +0000 UTC"
+ *  },
+ *  "Server key": {
+ *      "CN": "dns.google"
+ *  }
+ * }
+ **/
 
-// e.g. $to = "2023-04-22 12:03:50 +0000 UTC"
-$to = $data["SSL certificate validity"]["To"] ?? "";
-
-if ($expireInSeconds == -1 || $to == "") {
+if (array_key_exists('SSL certificate', $data)) {
+    $days = $data['SSL certificate']['Expiration days'];
+    $expirationDate = $data['SSL certificate']['To'];
+} else {
     $cv->add([
-        'Text' => "Invalid data returned from $cmd",
+        'Text' => 'Unable to interpret json content',
         'State' => $errorState
     ]);
     $cv->bye();
 }
 
-$criticalExpiration = Common::getMonitoringPackParameter(array_merge($OPT, array(
-    'key' => 'Critical', 'default' => '10d'
-)));
-
-// 10 days is default
-$threshold = 10 * 86400;
-if (str_ends_with($criticalExpiration, "d")) {
-    $threshold = 86400 * (str_replace("d", "", $criticalExpiration));
+// get the CN (for output only)
+$cn = '';
+if (array_key_exists('Server key', $data)) {
+    $sk = $data['Server key'];
+    if (array_key_exists('CN', $sk)) {
+        $cn = $sk['CN'];
+    }
 }
 
 $state = Constants::OK;
-if ($expireInSeconds < $threshold) {
+if ($days < $warning) {
+    $state = Constants::WARNING;
+}
+if ($days < $critical) {
     $state = Constants::CRITICAL;
 }
 
-$cv->add([
-    'Text' => "Certificate expiration date: $to",
-    'Value' => $expireInSeconds,
-    'State' => $state,
-]);
+if ($cn == '') {
+    if ($state == Constants::OK) {
+        $text = "Certificate expires in $days day(s)";
+    } else {
+        $text = "Certificate expires on $expirationDate";
+    }
+} else {
+    if ($state == Constants::OK) {
+        $text = "Certificate '$cn' expires in $days day(s)";
+    } else {
+        $text = "Certificate '$cn' expires on $expirationDate";
+    }
+}
+
+$cv->add(['Text' => "$text", 'Value' => $days, 'State' => $state,]);
 $cv->bye();
 
 /**
