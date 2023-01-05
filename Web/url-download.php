@@ -181,7 +181,7 @@ if ($downloadState != Constants::OK) {
 $correlation = new StateCorrelation(['h' => "$host", 's' => "$service", 'Debug' => $debug]);
 
 $cvDownload->init()->commit();
-$correlation->add($cvDownload->getData());
+$correlation->add($cvDownload);
 
 # ************ download time  ************
 $cvDownloadTime = new CheckValue(array(
@@ -194,7 +194,7 @@ $cvDownloadTime = new CheckValue(array(
 ));
 
 $cvDownloadTime->init()->commit();
-$correlation->add($cvDownloadTime->getData());
+$correlation->add($cvDownloadTime);
 
 // test if content should be checked, too - otherwise we are finished
 
@@ -216,7 +216,7 @@ $cvContent = new CheckValue(array(
 ));
 
 $cvContent->init()->commit();
-$correlation->add($cvContent->getData());
+$correlation->add($cvContent);
 
 $correlation->bye();
 

@@ -16,12 +16,12 @@ if (!isset($OPT)) {
 $now = date('Y-m-d h:i:s');
 
 $host = $OPT['h'] ?? '';
-$service = $OPT['s'] ?? 'NATS and ODIN round trip check';
+$service = $OPT['s'] ?? 'NATS Messagebroker';
 $debug = $OPT['Debug'] ?? false;
 
 CommandLine::terminateOnEmpty($host);
 
-// store $now on the message broker defined in baseConfig.json
+// publish content of $now to the message broker defined in baseConfig.json
 $shellCommand = sprintf(
     "/opt/watchit/bin/publish -out requestUrl -p V1.file -h '%s' -s '%s' '%s'", $host, $service, $now);
 if ($debug) {
@@ -60,7 +60,7 @@ if ($fromApi === false) {
 curl_close($ch);
 
 if ($now === $fromApi) {
-    print "NATS and ODIN service are OK\n";
+    print "Service is OK\n";
     exit(Constants::NUMERIC_OK);
 }
 
@@ -68,5 +68,5 @@ if ($debug) {
     var_dump($fromApi);
 }
 
-print "NATS or ODIN service error\n";
+print "Service is CRITICAL\n";
 exit(Constants::NUMERIC_CRITICAL);
