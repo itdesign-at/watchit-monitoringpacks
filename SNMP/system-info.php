@@ -98,13 +98,15 @@ if (array_key_exists("uptime", $data)) {
     $correlation->arrayAppend(Constants::Text, $cvUptime->getText());
 }
 
-$correlation->commit();
-if (array_key_exists('Output', $correlation->args) && is_string($correlation->args['Output'])) {
-    print ($correlation->args['Output']);
-} else {
-    $allTextLines = $correlation->args[Constants::Text];
-    print(implode(",", $allTextLines));
-}
-print "\n";
-exit(0);
+$correlation->init();    // calc exit only
+$correlation->commit();  // send all measurements
 
+// get line(s) or a single json line
+$out = $correlation->getOutput();
+if (is_array($out)) {
+    print implode(", ", $out);
+} else {
+    print $out;
+}
+print ("\n");
+exit($correlation->getExit());
