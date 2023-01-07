@@ -133,6 +133,8 @@ foreach ($snmpStorageData as $storageEntry) {
 
     $cv = new CheckValue(['k' => 'storageEntry', 'Debug' => $debug]);
 
+    $th['c'] = '@{UsedPercent} gt 20';
+
     $cv->add($storageEntry);
     $cv->add([
         'h' => "$host",
@@ -154,26 +156,7 @@ foreach ($snmpStorageData as $storageEntry) {
     $storageTable->add($data);
 }
 
-// nice OK Text
-$n = count($storageTable->table);
-if ($n == 1) {
-    if ($section == "disk") {
-        $storageTable->set(Constants::OkText, "1 Disk/Partition OK");
-    } else {
-        $storageTable->set(Constants::OkText, '1 Memory entry OK');
-    }
-} else if ($n > 1) {
-    if ($section == "disk") {
-        $storageTable->set(Constants::OkText, sprintf('%d Disks/Partitions OK', $n));
-    } else {
-        $storageTable->set(Constants::OkText, sprintf('%d Memory entries OK', $n));
-    }
-} else {
-    $storageTable->set(Constants::OkText, "no data in storageTable");
-}
-
-
-$storageTable->bye();
+$storageTable->bye(['section' => $section]);
 
 /**
  * isDisk check disks only - see SNMP Type definition
