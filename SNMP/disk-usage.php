@@ -133,8 +133,6 @@ foreach ($snmpStorageData as $storageEntry) {
 
     $cv = new CheckValue(['k' => 'storageEntry', 'Debug' => $debug]);
 
-    $th['c'] = '@{UsedPercent} gt 20';
-
     $cv->add($storageEntry);
     $cv->add([
         'h' => "$host",
