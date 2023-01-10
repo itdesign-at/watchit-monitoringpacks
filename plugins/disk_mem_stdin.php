@@ -1,5 +1,13 @@
 #!/usr/bin/env php
 <?php
+/**
+ * Read disk/memory entries from STDIN (from json Array).
+ * Source code and doc:
+ *
+ * https://github.com/itdesign-at/watchit-monitoringpacks/blob/main/plugins/disk_mem_stdin.md
+ *
+ */
+
 require_once("/opt/watchit/sources/php/vendor/autoload.php");
 
 use ITdesign\Plugins\CheckValue;
@@ -7,6 +15,7 @@ use ITdesign\Plugins\Constants;
 use ITdesign\Plugins\Plugin;
 use ITdesign\Plugins\StorageTable;
 use ITdesign\Utils\CommandLine;
+use ITdesign\Utils\Common;
 use ITdesign\Utils\FilterThreshold;
 
 const Description = 'Description';
@@ -19,7 +28,7 @@ $service = $OPT['s'] ?? '';
 $debug = $OPT['Debug'] ?? false;
 
 if ($host == '' || $keyword == '') {
-    print "requires -h <host> and -k <Disk|Memory>\n";
+    print "requires -h <host> and -k <disk|memory>\n";
     exit(3);
 }
 
@@ -51,14 +60,13 @@ $textTemplate = '@{Description} is @{State} (@{FreePercent}% free @{FreeReadable
 
 foreach ($data as $storageEntry) {
 
-    // contains disk or memory description like "/usr" or "Swap space"
-    $description = '';
-    if (array_key_exists(Description, $storageEntry)) {
-        $description = $storageEntry[Description];
-        if ($debug) {
-            CheckValue::dbg(__FILE__, __FUNCTION__, $description);
-        }
+    if (!array_key_exists(Description, $storageEntry)) {
+        continue;
     }
+
+    $storageEntry = Common::mbc($storageEntry);
+
+    $description = $storageEntry[Description];
 
     // check include filter - take all storage entries if not configured
     $shouldBeIncluded = false;
@@ -70,9 +78,6 @@ foreach ($data as $storageEntry) {
     if ($shouldBeIncluded === false) {
         continue;
     }
-
-    // update the entry with the modified description
-    $storageEntry[Description] = $description;
 
     $th = FilterThreshold::getThreshold(['h' => $host, 's' => $description, 'section' => $section]);
 
@@ -106,7 +111,8 @@ foreach ($data as $storageEntry) {
 $storageTable->bye(['section' => $section]);
 
 
-function bye(StorageTable $storageTable, array $OPT) {
+function bye(StorageTable $storageTable, array $OPT)
+{
     $convertUnknown = $OPT['convertUnknown'] ?? false;
 
     // construct a syntactical storage table with one UNKNOWN entry which
