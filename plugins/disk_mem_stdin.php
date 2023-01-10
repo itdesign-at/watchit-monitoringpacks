@@ -27,9 +27,14 @@ $host = $OPT['h'] ?? '';
 $service = $OPT['s'] ?? '';
 $debug = $OPT['Debug'] ?? false;
 
-if ($host == '' || $keyword == '') {
-    print "requires -h <host> and -k <disk|memory>\n";
-    exit(3);
+CommandLine::terminateOnEmpty($host);
+
+if ($keyword == '') {
+    if (str_contains(strtolower($service), "mem")) {
+        $keyword = "memory";
+    } else {
+        $keyword = "disk";
+    }
 }
 
 $storageTable = new StorageTable(['h' => $host, 's' => $service, 'Debug' => $debug]);
