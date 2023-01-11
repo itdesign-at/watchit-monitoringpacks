@@ -54,15 +54,10 @@ $snmpStorageData = $snmp->getStorageTable();
 $n = count($snmpStorageData);
 
 if ($n < 1) {
-    // construct a syntactical storage table with one UNKNOWN entry which
-    // forces to write "NoData" to the broker
-    $storageTable->table = [
-        [
-            Constants::Exit => Constants::NUMERIC_UNKNOWN,
-            Constants::UnknownText => $OPT[Constants::UnknownText] ?? Constants::NoDataViaSNMP,
-        ]
-    ];
-    $storageTable->bye(['stay' => true]);
+    // write NoData to the backend - we do not have storage entries
+    $storageTable->set('Text', $OPT[Constants::UnknownText] ?? Constants::NoDataViaSNMP);
+    $storageTable->commit();
+    print $storageTable->getOutput() . "\n";
     if ($convertUnknown) {
         exit(Constants::NUMERIC_CRITICAL);
     }
