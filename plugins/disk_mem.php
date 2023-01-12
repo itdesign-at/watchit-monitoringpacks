@@ -49,7 +49,7 @@ if (array_key_exists('f', $OPT)) {
 
 if ($in === false) {
     $storageTable->byeNoData([
-        'Text' => $OPT['UnknownText'] ?? 'no valid data from STDIN',
+        'Text' => $OPT['UnknownText'] ?? 'no valid data input data',
         'convertUnknown' => $OPT['convertUnknown'] ?? false
     ]);
 }
@@ -87,13 +87,7 @@ foreach ($data as $storageEntry) {
     $description = $storageEntry[Description];
 
     // check include filter - take all storage entries if not configured
-    $shouldBeIncluded = false;
-    try {
-        $shouldBeIncluded = Plugin::compare($includeFilter, $storageEntry);
-    } catch (Exception $e) {
-        // do nothing -> $shouldBeIncluded stays false
-    }
-    if ($shouldBeIncluded === false) {
+    if ($includeFilter != 'ON' && !Plugin::compare($includeFilter, $storageEntry)) {
         continue;
     }
 

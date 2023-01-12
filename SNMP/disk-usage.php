@@ -103,13 +103,7 @@ foreach ($snmpStorageData as $storageEntry) {
     }
 
     // check include filter - take all storage entries if not configured
-    $shouldBeIncluded = false;
-    try {
-        $shouldBeIncluded = Plugin::compare($includeFilter, $storageEntry);
-    } catch (Exception $e) {
-        // do nothing -> $shouldBeIncluded stays false
-    }
-    if ($shouldBeIncluded === false) {
+    if ($includeFilter != 'ON' && !Plugin::compare($includeFilter, $storageEntry)) {
         continue;
     }
 
