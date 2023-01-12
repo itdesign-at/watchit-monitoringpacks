@@ -1,10 +1,12 @@
 #!/usr/bin/env php
 <?php
 /**
- * Read disk/memory entries from STDIN (from json Array).
+ * Read disk/memory entries from STDIN (from json Array) or from a file
+ * given with option -f fileName
+ *
  * Source code and doc:
  *
- * https://github.com/itdesign-at/watchit-monitoringpacks/blob/main/plugins/disk_mem_stdin.md
+ * https://github.com/itdesign-at/watchit-monitoringpacks/blob/main/plugins/disk_mem.md
  *
  */
 
@@ -39,14 +41,25 @@ if ($keyword == '') {
 
 $storageTable = new StorageTable(['h' => $host, 's' => $service, 'Debug' => $debug]);
 
-$in = file_get_contents("php://stdin");
+if (array_key_exists('f', $OPT)) {
+    $in = file_get_contents($OPT['f']);
+} else {
+    $in = file_get_contents("php://stdin");
+}
+
 if ($in === false) {
-    bye($storageTable, $OPT);
+    $storageTable->byeNoData([
+        'Text' => $OPT['UnknownText'] ?? 'no valid data from STDIN',
+        'convertUnknown' => $OPT['convertUnknown'] ?? false
+    ]);
 }
 
 $data = json_decode($in, true);
 if ($data === null) {
-    bye($storageTable, $OPT);
+    $storageTable->byeNoData([
+        'Text' => $OPT['UnknownText'] ?? 'unable to decode json input',
+        'convertUnknown' => $OPT['convertUnknown'] ?? false
+    ]);
 }
 
 // $section is either "disk" or "memory"
@@ -114,24 +127,3 @@ foreach ($data as $storageEntry) {
 }
 
 $storageTable->bye(['section' => $section]);
-
-
-function bye(StorageTable $storageTable, array $OPT)
-{
-    $convertUnknown = $OPT['convertUnknown'] ?? false;
-
-    // construct a syntactical storage table with one UNKNOWN entry which
-    // forces to write "NoData" to the broker
-    $storageTable->table = [
-        [
-            Constants::Exit => Constants::NUMERIC_UNKNOWN,
-            Constants::UnknownText => $OPT[Constants::UnknownText] ?? 'no valid data',
-        ]
-    ];
-    $storageTable->bye(['stay' => true]);
-    if ($convertUnknown) {
-        exit(Constants::NUMERIC_CRITICAL);
-    }
-    exit(Constants::NUMERIC_UNKNOWN);
-}
-

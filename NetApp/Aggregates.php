@@ -2,7 +2,7 @@
 <?php
 require_once("/opt/watchit/sources/php/vendor/autoload.php");
 
-use ITdesign\Net\Snmp;
+use ITdesign\Net\NetAppSnmp;
 use ITdesign\Plugins\CheckValue;
 use ITdesign\Plugins\Constants;
 use ITdesign\Plugins\StorageTable;
@@ -29,7 +29,7 @@ $storageTable = new StorageTable(['h' => $host, 's' => $service, 'Debug' => $deb
 // read raw data into $snmpStorageData
 $snmpStorageData = [];
 
-$snmp = new Snmp($host);
+$snmp = new NetAppSnmp($host);
 $snmp->setDebug($debug);
 $snmpStorageData = $snmp->getStorageTable();
 
@@ -60,5 +60,8 @@ if ($debug) {
 // for a nice output
 $textTemplate = '@{Description} is @{State} (@{FreePercent}% free @{FreeReadable}@{FreeUnit}, @{UsedPercent}% used @{UsedReadable}@{UsedUnit})';
 
+print_r($snmpStorageData);
+print "under construction\n";
+exit(3);
 
 

@@ -1,6 +1,7 @@
 # Intro
 Read disk or memory data from STDIN. Input data must be a valid json array with
-"Description" and geometry filled - see example below.
+"Description" and geometry filled - see example below. Parameter -f fileName can be used,
+too to get data from the file specified.
 
 The minimum required fields for one entry are "Description" and two parameters which
 allow to calc the rest. 
@@ -13,10 +14,17 @@ Example:
         "Size": 83768320000
     },
 
+The option -s determines if disks or memory datasets are read. It checks for
+'mem' (converted lowercase) to know to read memory data. Optional option -k 
+allows to overwrite this.
+
 # Usage example
 
-    # cat /tmp/disk-data.json | ./disk_mem_stdin.php -h host.demo.at -k disk -s 'disk-usage'
+    # cat /tmp/disk-data.json | ./disk_mem_stdin.php -h host.demo.at -s 'disk-usage'
     <plugin output here>
+
+    # ./disk_mem_stdin.php -h host.demo.at -s 'disk-usage' -f /tmp/disk-data.json
+    <same plugin output here>
 
     # cat /tmp/disk-data.json 
     [

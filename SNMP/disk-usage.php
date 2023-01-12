@@ -54,14 +54,10 @@ $snmpStorageData = $snmp->getStorageTable();
 $n = count($snmpStorageData);
 
 if ($n < 1) {
-    // write NoData to the backend - we do not have storage entries
-    $storageTable->set('Text', $OPT[Constants::UnknownText] ?? Constants::NoDataViaSNMP);
-    $storageTable->commit();
-    print $storageTable->getOutput() . "\n";
-    if ($convertUnknown) {
-        exit(Constants::NUMERIC_CRITICAL);
-    }
-    exit(Constants::NUMERIC_UNKNOWN);
+    $storageTable->byeNoData([
+        'Text' => Constants::NoDataViaSNMP,
+        'convertUnknown' => $OPT['convertUnknown'] ?? false
+    ]);
 }
 
 // set to 'ON' when no include filter is configured. Plugin::compare returns
