@@ -26,9 +26,9 @@ if ($address === '') {
 
 CommandLine::terminateOnEmpty($address);
 
-$cmd = sprintf("%s -k %s -h '%s' -s '%s' -a '%s' -oF json",
-    binary, $keyword, $host, $service, $address
-);
+// $cmd is used to get ping data only - do not give -k here to avoid sending
+// measurement data to NATS, used to get $data['Text'], $data['Rtt'] and $data['Pl']
+$cmd = sprintf("%s -h '%s' -s '%s' -a '%s' -oF json", binary, $host, $service, $address);
 
 if ($debug) {
     $cmd .= " -Debug";
@@ -43,17 +43,29 @@ if (count($out) !== 1) {
 }
 $data = json_decode($out[0], true);
 
-// use CheckValue to compare against warning and critical
 $th = FilterThreshold::getThreshold(array('h' => $host, 'section' => 'ping'));
-$cv = new CheckValue(['w' => $th['w'], 'c' => $th['c'], 'Debug' => $debug]);
+
+// use CheckValue to compare against warning and critical
+$cv = new CheckValue(array_merge($OPT,['k' => $keyword, 'w' => $th['w'], 'c' => $th['c']]));
+
 if (array_key_exists('Rtt', $data) && array_key_exists('Pl', $data)) {
     $cv->add([
+        'Text' => $data['Text'],
+        'Rtt' => $data['Rtt'],
+        'Pl' => $data['Pl'],
         'RoundTripTime' => $data['Rtt'],
         'RoundTripTime.ms' => $data['Rtt'] * 1000,
         'PacketLoss' => $data['Pl']
     ]);
 } else {
-    $cv->add($data);
+    $cv->add([
+        'Text' => 'No answer - host is down or unreachable',
+        'Rtt' => -1,
+        'Pl' => 100,
+        'RoundTripTime' => -1,
+        'RoundTripTime.ms' => -1,
+        'PacketLoss' => 100
+    ]);
     if ($convertUnknown) {
         $cv->add([Constants::State => Constants::CRITICAL]);
     }
@@ -62,18 +74,4 @@ if (array_key_exists('Rtt', $data) && array_key_exists('Pl', $data)) {
     }
 }
 
-$cv->init();
-
-if (array_key_exists(Constants::DSN, $data) && array_key_exists(Constants::Text, $data)) {
-    $out = [Constants::DSN => $data[Constants::DSN], Constants::Text => $data[Constants::Text]];
-    print json_encode($out);
-} else if (array_key_exists(Constants::Text, $data)) {
-    print $data[Constants::Text];
-} else {
-    print "no data";
-}
-print "\n";
-
-exit($cv->getExit());
-
-
+$cv->bye();
