@@ -1,0 +1,6 @@
+{
+  "description" : "Read MS Windows Services from svSvcEntry MIB",
+  "dialect" : "php",
+  "module" : "Basic",
+  "service" : "Windows Services"
+}
