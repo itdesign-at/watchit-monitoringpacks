@@ -1,0 +1,6 @@
+{
+   "description" : "HPE Compare Platform - temperature sensores via SNMP",
+   "dialect" : "php",
+   "module" : "Application",
+   "service" : "temperature sensors"
+}
