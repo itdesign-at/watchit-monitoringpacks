@@ -1,8 +1,12 @@
 #!/usr/bin/env php
 <?php
+/**
+ * Read HPE comware temperature sensors with SNMP
+ */
 require_once("/opt/watchit/sources/php/vendor/autoload.php");
 
 use ITdesign\Plugins\CheckValue;
+use ITdesign\Plugins\Constants;
 use ITdesign\Plugins\StateCorrelation;
 use ITdesign\Utils\CommandLine;
 use ITdesign\Net\Snmp;
@@ -30,7 +34,9 @@ $oids = [
     "Temperature 6" => "1.3.6.1.4.1.25506.2.6.1.1.1.1.12.206"
 ];
 
-$corr = new StateCorrelation(['h' => "$host",'s' => "$service"]);
+$corr = new StateCorrelation(['h' => "$host", 's' => "$service"]);
+
+$isValid = true;
 
 foreach ($oids as $service => $oid) {
 
@@ -40,6 +46,11 @@ foreach ($oids as $service => $oid) {
         $snmp = new Snmp($host);
         $snmp->setDebug($debug);
         $temperature = $snmp->get($oid);
+    }
+
+    if (!is_numeric($temperature)) {
+        $isValid = false;
+        break;
     }
 
     switch ($service) {
@@ -71,11 +82,8 @@ foreach ($oids as $service => $oid) {
 
     $cv = new CheckValue(
         [
-            'k' => 'gauge',
-            'h' => $host,
-            's' => $service,
-            'w' => $thWarning,
-            'c' => $thCritical,
+            'k' => 'gauge', 'h' => "$host", 's' => "$service",
+            'w' => $thWarning, 'c' => $thCritical,
             'Value' => $temperature,
             'Text' => "$service: $temperature C",
             'Debug' => $debug,
@@ -87,6 +95,20 @@ foreach ($oids as $service => $oid) {
     $corr->add($cv);
 }
 
+// write NoData (= missing 'Value' key) on each temperature sensor when SNMP is not working
+if (!$isValid) {
+    $corr = new StateCorrelation(['h' => "$host", 's' => "$service"]);
+    foreach ($oids as $service => $oid) {
+        $cv = new CheckValue(
+            [
+                'k' => 'gauge', 'h' => "$host", 's' => "$service",
+                Constants::State => Constants::UNKNOWN,
+                'Text' => Constants::NoDataViaSNMP, 'Debug' => $debug
+            ]
+        );
+        $cv->init();
+        $corr->add($cv);
+    }
+}
+
 $corr->bye();
-
-
