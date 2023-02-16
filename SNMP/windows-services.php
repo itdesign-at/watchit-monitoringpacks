@@ -14,7 +14,7 @@ if (!isset($OPT)) {
     $OPT = CommandLine::getCommandLineOptions($argv);
 }
 
-$keyword = 'customTable';
+$keyword = 'windowsServicesTable';
 $host = $OPT['h'] ?? '';
 $service = $OPT['s'] ?? '';
 $debug = $OPT['Debug'] ?? false;
