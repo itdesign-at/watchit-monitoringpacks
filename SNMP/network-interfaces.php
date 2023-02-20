@@ -7,8 +7,10 @@
 require_once("/opt/watchit/sources/php/vendor/autoload.php");
 
 use ITdesign\Plugins\CheckValue;
+use ITdesign\Plugins\Constants;
 use ITdesign\Plugins\InterfaceTable;
 use ITdesign\Utils\CommandLine;
+
 const SnmpReader = "/opt/watchit/bin/pSnmp";
 
 if (!isset($OPT)) {
@@ -16,17 +18,31 @@ if (!isset($OPT)) {
 }
 
 $host = $OPT['h'] ?? '';
-if ($host == '') {
-    print("option -h <host> is empty or missing\n");
-    exit(1);
-}
+$convertUnknown = $OPT['convertUnknown'] ?? false;
+
+CommandLine::terminateOnEmpty($host);
 
 $interfaceTable = new InterfaceTable($OPT);
 
 $allInterfaces = pSnmp($OPT);
+
+if (empty($allInterfaces)) {
+    $interfaceTable->commit();
+    $output = json_encode([
+        Constants::DSN => $interfaceTable->args['DSN'],
+        Constants::Text => Constants::NoDataViaSNMP
+    ]);
+    print "$output\n";
+    if ($convertUnknown) {
+        exit (Constants::NUMERIC_CRITICAL);
+    }
+    exit (Constants::NUMERIC_UNKNOWN);
+}
+
 foreach ($allInterfaces as $oneInterface) {
     $interfaceTable->add($oneInterface);
 }
+
 $interfaceTable->bye();
 
 /**
@@ -77,6 +93,28 @@ function pSnmp(array $conf): array
     }
 
     if ($data === null) {
+        return [];
+    }
+
+    /**
+     * e.g. $data = Array
+     * (
+     * [0] => Array
+     * (
+     * [AdminStatus] => up
+     * [Description] => lo
+     * [Hash] => 8051b7a4
+     * [IP] => 127.0.0.1
+     * [In] => 524431484800
+     * [Index] => 1
+     * [OperStatus] => up
+     * [Out] => 524431484800
+     * [Speed] => 10000000
+     * [SpeedReadable] => 10.00 Mbit
+     * )
+     */
+
+    if (!array_key_exists("0", $data)) {
         return [];
     }
 
