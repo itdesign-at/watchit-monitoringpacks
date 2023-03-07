@@ -77,7 +77,7 @@ function pSnmp(array $conf): array
     }
 
     // e.g. /opt/watchit/bin/pSnmp -out json -h localhost
-    $cmd = sprintf("%s -out json -h %s -op entries -rc %s", SnmpReader, $execHost, $readConfigFile);
+    $cmd = sprintf("%s -out json -h '%s' -op entries -rc %s", SnmpReader, $execHost, $readConfigFile);
 
     if ($debug) {
         CheckValue::dbg(__FUNCTION__, "line: " . __LINE__, "\$cmd:" . $cmd);
