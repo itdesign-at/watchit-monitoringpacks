@@ -7,7 +7,7 @@ use ITdesign\Plugins\Constants;
 use ITdesign\Utils\CommandLine;
 use ITdesign\Utils\FilterThreshold;
 
-const binary = "/opt/watchit/plugins/itd_check_ping.pl";
+const binary = "/opt/watchit/bin/pingParser";
 
 if (!isset($OPT)) {
     $OPT = CommandLine::getCommandLineOptions($argv);
@@ -20,52 +20,81 @@ $service = $OPT['s'] ?? '';
 $debug = $OPT['Debug'] ?? false;
 $convertUnknown = $OPT['convertUnknown'] ?? false;
 
-if ($address === '') {
-    $address = $host;
-}
+$cmd = sprintf("%s -h '%s' -a '%s' 2>/dev/null", binary, $host, $address);
 
-CommandLine::terminateOnEmpty($address);
-
-// $cmd is used to get ping data only - do not give -k here to avoid sending
-// measurement data to NATS, used to get $data['Text'], $data['Rtt'] and $data['Pl']
-$cmd = sprintf("%s -h '%s' -s '%s' -a '%s' -oF json", binary, $host, $service, $address);
+$out = [];
+exec($cmd, $out, $exit);
 
 if ($debug) {
-    $cmd .= " -Debug";
-    CheckValue::dbg("main", "cmd", $cmd);
+    fwrite(STDERR, "$cmd\n");
+    fwrite(STDERR, print_r($out,true));
 }
 
-$data = [];
-
-exec($cmd, $out, $exit);
-if (count($out) !== 1) {
-    exit(Constants::NUMERIC_CRITICAL);
+if (!is_array($out) || count($out) !== 1) {
+    printf("ERROR: unable to process %s\n", binary);
+    if ($convertUnknown) {
+        exit(Constants::NUMERIC_CRITICAL);
+    }
+    exit(Constants::NUMERIC_UNKNOWN);
 }
+
+// e.g. $out[0] = {"Host":"www.orf.at","Pl":0,"Rtt":0.000091,"Text":"0.09ms rtt, 0% packet loss"}
 $data = json_decode($out[0], true);
+if ($data === null) {
+    printf("ERROR: unable to json_decode %s\n", $out[0]);
+    if ($convertUnknown) {
+        exit(Constants::NUMERIC_CRITICAL);
+    }
+    exit(Constants::NUMERIC_UNKNOWN);
+}
 
-$th = FilterThreshold::getThreshold(array('h' => $host, 'section' => 'ping'));
+$th = FilterThreshold::getThreshold(['h' => $host, 'section' => 'ping']);
 
 // use CheckValue to compare against warning and critical
-$cv = new CheckValue(array_merge($OPT,['k' => $keyword, 'w' => $th['w'], 'c' => $th['c']]));
+$cv = new CheckValue([
+    'k' => $keyword,
+    'h' => "$host",
+    's' => "$service",
+    'w' => $th['w'],
+    'c' => $th['c']
+]);
 
 if (array_key_exists('Rtt', $data) && array_key_exists('Pl', $data)) {
     $cv->add([
         'Text' => $data['Text'],
         'Rtt' => $data['Rtt'],
         'Pl' => $data['Pl'],
+        // add those three values for backwards compatibility when comparing
+        // warning and critical threshold $th['w'] and $th['c']
         'RoundTripTime' => $data['Rtt'],
         'RoundTripTime.ms' => $data['Rtt'] * 1000,
         'PacketLoss' => $data['Pl']
     ]);
-} else {
+} else if (!array_key_exists('Rtt', $data) && array_key_exists('Pl', $data)) {
+    /**
+     * $data = Array
+     * (
+     * [Host] => www.demo.at
+     * [Pl] => 100
+     * [Text] => 100% packet loss
+     * )
+     */
     $cv->add([
-        'Text' => 'No answer - host is down or unreachable',
-        'Rtt' => -1,
-        'Pl' => 100,
+        'Text' => $data['Text'],
+        'Pl' => $data['Pl'],
+        'Rtt' => -1, // the ODIN service expects both 'Rtt' and 'Pl' to write a valid record
         'RoundTripTime' => -1,
         'RoundTripTime.ms' => -1,
-        'PacketLoss' => 100
+        'PacketLoss' => 100,
     ]);
+    // CRITICAL makes sense when no thresholds are set
+    // could be overwritten in the thresholds table ...
+    if ($th['w'] == "" && $th['c'] == "") {
+        $cv->add([Constants::State => Constants::CRITICAL]);
+    }
+} else {
+    // this code segment should never be reached
+    $cv->add($data);
     if ($convertUnknown) {
         $cv->add([Constants::State => Constants::CRITICAL]);
     }
