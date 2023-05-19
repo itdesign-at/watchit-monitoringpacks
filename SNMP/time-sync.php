@@ -24,8 +24,7 @@ $cv = new CheckValue(['k' => "$keyword", 'h' => "$host", 's' => "$service", 'Deb
 
 $offset = 0;
 try {
-    $offset = (int)Common::getMonitoringPackParameter(array_merge($OPT,
-        array('key' => 'offset', 'default' => 0)));
+    $offset = (int)Common::getMonitoringPackParameter($OPT,'offset');
 } catch (Exception $e) {
 }
 
