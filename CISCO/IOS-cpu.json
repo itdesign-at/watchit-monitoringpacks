@@ -1,0 +1,6 @@
+{
+  "description" : "Query Cisco IOS devices and read their cpu-usage from OID 1.3.6.1.4.1.9.9.109.1.1.1.1.8. Threhold example: @{LoadAverage} gt 80%",
+  "dialect" : "php-cust",
+  "module" : "Custom",
+  "service" : "cpu-load"
+}
