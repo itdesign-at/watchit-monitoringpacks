@@ -1,6 +1,6 @@
 {
    "description" : "Read hrProcessorLoad and calculate average",
-   "dialect" : "php",
+   "dialect" : "php-cust",
    "module" : "Basic",
    "service" : "cpu-load"
 }

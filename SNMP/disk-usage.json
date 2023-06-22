@@ -1,6 +1,6 @@
 {
    "description" : "Read disks/volumes from hrStorage MIB",
-   "dialect" : "php",
+   "dialect" : "php-cust",
    "module" : "Basic",
    "service" : "disk-usage"
 }

@@ -1,6 +1,6 @@
 {
    "description" : "Download URL and check success, and/or downloadtime and/or content",
-   "dialect" : "php",
+   "dialect" : "php-cust",
    "module" : "Basic",
    "service" : "URL download"
 }

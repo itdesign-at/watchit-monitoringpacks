@@ -1,6 +1,6 @@
 {
    "description" : "Print the host/device 'description' field filled in inventory",
-   "dialect" : "php",
+   "dialect" : "php-cust",
    "module" : "Basic",
    "service" : "Inventory description"
 }

@@ -1,6 +1,6 @@
 {
    "description" : "Read AKCP SesorProbe temperature with SNMP",
-   "dialect" : "php",
-   "module" : "Application",
+   "dialect" : "php-cust",
+   "module" : "Custom",
    "service" : "Temperature"
 }

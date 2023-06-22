@@ -1,6 +1,6 @@
 {
   "description" : "Read network interfaces from ifTable MIB",
-  "dialect" : "php",
+  "dialect" : "php-cust",
   "module" : "Basic",
   "service" : "network-interfaces"
 }

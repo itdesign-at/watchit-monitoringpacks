@@ -1,6 +1,6 @@
 {
    "description" : "Read hrSystemDate with SNMP and compare it against the time of the localhost. Thresholds can be set with @{TimeDiffLocal} gt 30 or @{TimeDiffLocal} lt -30",
-   "dialect" : "php",
+   "dialect" : "php-cust",
    "module" : "Basic",
    "service" : "time-sync"
 }

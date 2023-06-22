@@ -1,6 +1,6 @@
 {
    "description" : "Read memory datasets from hrStorage MIB",
-   "dialect" : "php",
+   "dialect" : "php-cust",
    "module" : "Basic",
    "service" : "memory"
 }
