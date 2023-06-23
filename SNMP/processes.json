@@ -1,0 +1,6 @@
+{
+  "description" : "Query running processes with SNMP (hrSWRunName + hrSWRunParameters) and display them in a table. No WARNING and no CRITICALs are set.",
+  "dialect" : "php-cust",
+  "module" : "Basic",
+  "service" : "Processes"
+}
