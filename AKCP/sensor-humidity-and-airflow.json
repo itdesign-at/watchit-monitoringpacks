@@ -1,0 +1,6 @@
+{
+  "description" : "Query AKCP humidity and airflow sensor on OID .1.3.6.1.4.1.3854.1.2.2.1.17.1. Thresholds can be defined in section Humidity or Airflow with the Macro @{Counter}",
+  "dialect" : "php-cust",
+  "module" : "Custom",
+  "service" : "Humidity and Airflow"
+}
