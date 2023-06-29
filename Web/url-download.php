@@ -78,10 +78,11 @@ $debug = $OPT['Debug'] ?? false;
 // es immer CRITICAL!
 // $convertUnknown = $OPT['convertUnknown'] ?? false;
 
-/* all parameters can be configured in a json string */
-$jsonConfig = Common::getMonitoringPackParameter(array_merge($OPT, array(
-    'key' => 'JsonConfig', 'default' => ''
-)));
+try {
+  $jsonConfig = Common::getMonitoringPackParameter($OPT,'JsonConfig');
+} catch (Exception $e) {
+  $jsonConfig = '';
+}
 
 $config = array();
 if ($jsonConfig !== '') {
@@ -89,31 +90,35 @@ if ($jsonConfig !== '') {
 }
 
 if (!array_key_exists('Download_URL', $config)) {
-    $config['Download_URL'] = Common::getMonitoringPackParameter(
-        array_merge($OPT, array(
-            'key' => 'Download_URL', 'default' => 'https://@{h}'
-        )));
+    try {
+      $config['Download_URL'] = Common::getMonitoringPackParameter($OPT,'Download_URL');
+    } catch (Exception $e) {
+      $config['Download_URL'] = "https://$host";
+    }
 }
 
 if (!array_key_exists('Download_Content', $config)) {
-    $config['Download_Content'] = Common::getMonitoringPackParameter(
-        array_merge($OPT, array(
-            'key' => 'Download_Content', 'default' => ''
-        )));
+    try {
+      $config['Download_Content'] = Common::getMonitoringPackParameter($OPT,'Download_Content');
+    } catch (Exception $e) {
+      $config['Download_Content'] = '';
+    }
 }
 
 if (!array_key_exists('Warning_Time', $config)) {
-    $config['Warning_Time'] = Common::getMonitoringPackParameter(
-        array_merge($OPT, array(
-            'key' => 'Warning_Time', 'default' => '3'
-        )));
+    try {
+      $config['Warning_Time'] = Common::getMonitoringPackParameter($OPT,'Warning_Time');
+    } catch (Exception $e) {
+      $config['Warning_Time'] = '3';
+    }
 }
 
 if (!array_key_exists('Critical_Time', $config)) {
-    $config['Critical_Time'] = Common::getMonitoringPackParameter(
-        array_merge($OPT, array(
-            'key' => 'Critical_Time', 'default' => '10'
-        )));
+    try {
+      $config['Critical_Time'] = Common::getMonitoringPackParameter($OPT,'Critical_Time');
+    } catch (Exception $e) {
+      $config['Critical_Time'] = '10';
+    }
 }
 
 // optional content string to search for
