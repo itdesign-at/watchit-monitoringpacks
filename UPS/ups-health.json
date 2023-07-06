@@ -1,0 +1,6 @@
+{
+  "description" : "Check UPS battery Status, Capacity, Seconds, Remaining Battery and Voltage with SNMP",
+  "dialect" : "php-cust",
+  "module" : "Custom",
+  "service" : "UPS Health"
+}
