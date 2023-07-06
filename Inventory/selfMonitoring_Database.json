@@ -1,0 +1,6 @@
+{
+  "description" : "Query the local MySQL / MariaDB and check the WATCHITDB",
+  "dialect" : "php-cust",
+  "module" : "Custom",
+  "service" : "WATCH IT Database"
+}
