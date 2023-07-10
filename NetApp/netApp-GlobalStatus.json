@@ -1,0 +1,6 @@
+{
+  "description" : "Query the NETWORK-APPLIANCE-MIB for the miscGlobalStatusMessage which is an indicator for the overall health. If the status message is not equal to \"The system's global status is normal.\" the service is CRITICAL",
+  "dialect" : "php-cust",
+  "module" : "Custom",
+  "service" : "Global status"
+}
