@@ -1,0 +1,6 @@
+{
+  "description" : "Query the NETAPP-MIB for the cpuBusyTimePerCent and display current cpu-usage. Threhold example: @{LoadAverage} gt 80%",
+  "dialect" : "php-cust",
+  "module" : "Custom",
+  "service" : "cpu-load"
+}
