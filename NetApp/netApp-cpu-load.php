@@ -33,7 +33,7 @@ $convertUnknown = $OPT['convertUnknown'] ?? false;
 CommandLine::terminateOnEmpty($host);
 
 $cv = new CheckValue([
-    'k' => 'counter',
+    'k' => 'gauge',
     'h' => "$host",
     's' => "$service",
     'Debug' => $debug,
