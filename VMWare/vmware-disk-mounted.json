@@ -1,0 +1,6 @@
+{
+  "description" : "Get relevant disk mounted data for ESXi Server. Powershell Script used get-VMDisk-Mounted.ps1",
+  "dialect" : "php-cust",
+  "module" : "Custom",
+  "service" : "disk-mounted"
+}

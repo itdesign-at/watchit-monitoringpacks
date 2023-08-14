@@ -1,0 +1,6 @@
+{
+  "description" : "Display hostsystem status for ESXi Server. You must define the parameter VMWare Datacenter. The package will be displayed on each device which is assigned to device group \"VMWare ESXi Server\"",
+  "dialect" : "php-cust",
+  "module" : "Custom",
+  "service" : "VMWare Hostsystem"
+}

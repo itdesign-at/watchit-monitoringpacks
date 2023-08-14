@@ -1,0 +1,6 @@
+{
+  "description" : "Datacenter needs to bet set via Code Parameter! Gets VMware Inventory via powershell get-VMInventory.ps1",
+  "dialect" : "php-cust",
+  "module" : "Custom",
+  "service" : "VMware Inventory"
+}

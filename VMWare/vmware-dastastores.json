@@ -1,0 +1,6 @@
+{
+  "description" : "In the most environments exist datastores which are accessible by more than one VMware Host, it makes no sense to monitor the capacity of these datastores on each Vmware host. You must define the parameter VMWare Datacenter. The package will be displayed on each device which is assigned to device group \"Virtual Center Server\"",
+  "dialect" : "php-cust",
+  "module" : "Custom",
+  "service" : "VMWare datastores"
+}
