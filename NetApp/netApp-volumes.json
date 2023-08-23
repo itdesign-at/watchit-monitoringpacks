@@ -1,0 +1,6 @@
+{
+  "description" : "Read Volumes, Snapshots, Aggregates via SNMP",
+  "dialect" : "php-cust",
+  "module" : "Custom",
+  "service" : "NetApp Volumes"
+}

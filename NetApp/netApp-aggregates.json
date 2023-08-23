@@ -1,0 +1,6 @@
+{
+  "description" : "Query the NetApp API for Aggregates. Username and Password is given via GlobalConfigParams",
+  "dialect" : "php-cust",
+  "module" : "Custom",
+  "service" : "Aggregates"
+}
