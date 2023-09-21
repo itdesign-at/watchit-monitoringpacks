@@ -8,6 +8,9 @@
  * Ubuntu 22.04 with PHP 8.1.2
  *
  * ported from file watchit-NetDisk.php
+ *
+ * 2023-09-23: check 'Summary' key on $storageEntry to
+ *             avoid eval problems
  */
 require_once("/opt/watchit/sources/php/vendor/autoload.php");
 
@@ -104,6 +107,13 @@ foreach ($snmpStorageData as $storageEntry) {
 
     // update the entry with the modified description
     $storageEntry[Description] = $description;
+
+    // The 'Summary' key is generated in mbc() at the end of disk/mem calculation
+    // and is an indicator that everything worked fine - so check it here before Plugin::compare below
+    // which evals ...
+    if (!array_key_exists('Summary', $storageEntry)) {
+            continue;
+    }
 
     // check include filter - take all storage entries if not configured
     if ($includeFilter != 'ON' && !Plugin::compare($includeFilter, $storageEntry)) {
