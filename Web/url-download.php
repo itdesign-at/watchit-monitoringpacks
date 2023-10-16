@@ -189,14 +189,36 @@ $cvDownload->init()->commit();
 $correlation->add($cvDownload);
 
 # ************ download time  ************
-$cvDownloadTime = new CheckValue(array(
-    'k' => 'gauge', 'h' => $host, 's' => $serviceDownloadTime,
-    'Text' => sprintf("Downloaded in %.2f ms", 1000 * $downloadTime),
-    'w' => "$downloadTime > " . $config['Warning_Time'],
-    'c' => "$downloadTime > " . $config['Critical_Time'],
-    'Value' => $downloadTime,
-    'Debug' => $debug,
-));
+$cvConfig = [
+      'k' => 'gauge', 
+      'h' => $host, 
+      's' => $serviceDownloadTime,
+      'Text' => sprintf("Downloaded in %.2f ms", 1000 * $downloadTime),
+      'Value' => $downloadTime,
+      'Debug' => $debug
+];
+
+// check if warning oder critical time is set to OFF 
+if ($config['Warning_Time'] != 'OFF' && $config['Critical_Time'] != 'OFF') {
+    $cvConfig[] = array(
+        'w'     => "$downloadTime > " . $config['Warning_Time'],
+        'c'     => "$downloadTime > " . $config['Critical_Time']
+    );
+}
+if ($config['Warning_Time'] === 'OFF') {
+    $cvConfig[] = array(
+        'w'     => 'OFF',
+        'c'     => "$downloadTime > " . $config['Critical_Time']
+    );
+}
+if ($config['Critical_Time'] === 'OFF') {
+    $cvConfig[] = array(
+        'w'     => "$downloadTime > " . $config['Warning_Time'],
+        'c'     => 'OFF'
+    );
+}
+
+$cvDownloadTime = new CheckValue($cvConfig);
 
 $cvDownloadTime->init()->commit();
 $correlation->add($cvDownloadTime);
