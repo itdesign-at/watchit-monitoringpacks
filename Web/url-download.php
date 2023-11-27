@@ -32,7 +32,9 @@ use ITdesign\Utils\Common;
  * -w ... warning time in seconds
  * -c ... critical time in seconds
  * -C ... content string
- * 
+ * -username ... username
+ * -password ... Password
+ *
  * Examples from the shell:
  * ------------------------
  * php /cfg/packages/URL\ download.php -J -u http://www.orf.at -w 3 -c 5 
@@ -57,6 +59,12 @@ if (in_array('-J', $argv)) {
                 break;
             case 'C':
                 $jsonConfig['Download_Content'] = $value;
+                break;
+            case 'username':
+                $jsonConfig['Username'] = $value;
+                break;
+            case 'password':
+                $jsonConfig['Password'] = $value;
                 break;
         }
     }
@@ -121,6 +129,23 @@ if (!array_key_exists('Critical_Time', $config)) {
     }
 }
 
+if (!array_key_exists('Username', $config)) {
+    try {
+        $config['Username'] = Common::getMonitoringPackParameter($OPT,'Username');
+    } catch (Exception $e) {
+        $config['Username'] = '';
+    }
+}
+
+if (!array_key_exists('Password', $config)) {
+    try {
+        $config['Password'] = Common::getMonitoringPackParameter($OPT,'Password');
+    } catch (Exception $e) {
+        $config['Password'] = '';
+    }
+}
+
+
 // optional content string to search for
 $contentToCheck = $config['Download_Content'];
 
@@ -133,7 +158,7 @@ $serviceContent = "Check content string '$contentToCheck'";
 $t0 = microtime(TRUE);
 
 $ch = curl_init();
-setCurlParameter($ch, $config['Download_URL']);
+setCurlParameter($ch, $config);
 $out = curl_exec($ch);
 $exit = curl_errno($ch);
 
@@ -247,7 +272,7 @@ $correlation->add($cvContent);
 
 $correlation->bye();
 
-function setCurlParameter($ch, $sUrl)
+function setCurlParameter($ch, $config)
 {
     curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (WindowsNT 6.3; WOW64; rv:36.0) Gecko/20100101 Firefox/36.0");
     # returns the curl_exec-Command as string instead of printing to the screen
@@ -258,6 +283,11 @@ function setCurlParameter($ch, $sUrl)
     # set following redirections -> maximum are 3 redirections
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
     # setting url
-    curl_setopt($ch, CURLOPT_URL, $sUrl);
+    curl_setopt($ch, CURLOPT_URL, $config['Download_URL']);
+    # set Username and Password for Basic Authentication
+    if (!empty($config['Download_Username']) && !empty($config['Download_Password'])) {
+        curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+        curl_setopt($ch, CURLOPT_USERPWD, "$config[Download_Username]:$config[Download_Password]");
+    }
     return $ch;
 }
