@@ -285,9 +285,9 @@ function setCurlParameter($ch, $config)
     # setting url
     curl_setopt($ch, CURLOPT_URL, $config['Download_URL']);
     # set Username and Password for Basic Authentication
-    if (!empty($config['Download_Username']) && !empty($config['Download_Password'])) {
+    if (!empty($config['Username']) && !empty($config['Password'])) {
         curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
-        curl_setopt($ch, CURLOPT_USERPWD, "$config[Download_Username]:$config[Download_Password]");
+        curl_setopt($ch, CURLOPT_USERPWD, "$config[Username]:$config[Password]");
     }
     return $ch;
 }
