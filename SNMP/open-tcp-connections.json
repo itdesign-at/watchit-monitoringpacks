@@ -1,0 +1,6 @@
+{
+  "description" : "Check open TCP Connections",
+  "dialect" : "php-cust",
+  "module" : "Basic",
+  "service" : "Open TCP Connections"
+}
