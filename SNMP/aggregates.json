@@ -1,0 +1,6 @@
+{
+   "description" : "Query the NETWORK-APPLIANCE-MIB for installed aggregates",
+   "dialect" : "php-cust",
+   "module" : "Application",
+   "service" : "aggregates"
+}
