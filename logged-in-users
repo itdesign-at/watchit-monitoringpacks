@@ -1,0 +1,6 @@
+{
+   "description" : "shows logged in user count",
+   "dialect" : "php-cust",
+   "module" : "Application",
+   "service" : "logged-in-users"
+}
