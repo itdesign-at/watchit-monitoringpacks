@@ -36,8 +36,8 @@ $cvUptime = new CheckValue([
     'k' => Constants::MetricCounter, 'h' => $host, 's' => "Uptime", 'Debug' => $debug,
 ]);
 
-// e.g. /opt/watchit/bin/osDetection -h dev-dc-01 -oid .1.3.6.1.2.1.1.1.0  -oF json
-exec(binary . " -h \"$host\" -oid .1.3.6.1.2.1.1.1.0 -oF json", $out, $exit);
+// e.g. /opt/watchit/bin/osDetection -h dev-dc-01 -oid .1.3.6.1.2.1.1.1.0  -fmt json
+exec(binary . " -h \"$host\" -oid .1.3.6.1.2.1.1.1.0 -fmt json", $out, $exit);
 if (count($out) != 1) {
     // missing "Value" -> writes "NoData" in the backend
     $cvUptime->commit();
