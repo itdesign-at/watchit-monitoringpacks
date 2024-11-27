@@ -1,0 +1,6 @@
+{
+   "description" : "Monitors ServerComponentState on Exchange Servers",
+   "dialect" : "php-cust",
+   "module" : "Custom",
+   "service" : "Exchange ServerComponentState"
+}
