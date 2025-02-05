@@ -42,7 +42,7 @@ if (empty($users)) {
         'k'     => 'binary',
         'h'     => $host,
         's'     => $service,
-        'Value'   => false,
+        'Value'   => true,
         'Text'  => "No Users are locked",
         'State' => 0
     ));
