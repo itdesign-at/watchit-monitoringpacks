@@ -53,7 +53,7 @@ if (empty($users)) {
             'k'     => 'binary',
             'h'     => $host,
             's'     => "locked user " . $user['SamAccountName'],
-            'Value'   => true,
+            'Value'   => false,
             'Text'  => "User " . $user['SamAccountName'] . " is locked",
             'State' => 2
         ));
