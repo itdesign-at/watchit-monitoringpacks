@@ -1,0 +1,6 @@
+{
+  "description" : "Checks the Locked Out Users of the Active Directory",
+  "dialect" : "php-cust",
+  "module" : "Custom",
+  "service" : "AD Locked Out Users"
+}
