@@ -1,0 +1,6 @@
+{
+  "description" : "Checks the Expiration Date / Days till Expiration of an SSL Certificate",
+  "dialect" : "php-cust",
+  "module" : "Custom",
+  "service" : "Certificate Expiration"
+}
