@@ -87,6 +87,7 @@ $debug = $OPT['Debug'] ?? false;
 // $convertUnknown = $OPT['convertUnknown'] ?? false;
 
 try {
+  // [* CodeParam JsonConfig ; Value={"Download_URL":"http://www.itdesign.at","Warning_Time":"5","Critical_Time":"OFF","Download_Method":"curl"} ; Desc=JSON config for this package *]
   $jsonConfig = Common::getMonitoringPackParameter($OPT,'JsonConfig');
 } catch (Exception $e) {
   $jsonConfig = '';
@@ -99,7 +100,8 @@ if ($jsonConfig !== '') {
 
 if (!array_key_exists('Download_URL', $config)) {
     try {
-      $config['Download_URL'] = Common::getMonitoringPackParameter($OPT,'Download_URL');
+        // [* CodeParam Download_URL ; Value=www.itdesign.at ; Desc=URL to download *]
+        $config['Download_URL'] = Common::getMonitoringPackParameter($OPT,'Download_URL');
     } catch (Exception $e) {
       $config['Download_URL'] = "https://$host";
     }
@@ -107,6 +109,7 @@ if (!array_key_exists('Download_URL', $config)) {
 
 if (!array_key_exists('Download_Content', $config)) {
     try {
+      // [* CodeParam Download_Content ; Value=Welcome ; Desc=Content to search for on the website *]
       $config['Download_Content'] = Common::getMonitoringPackParameter($OPT,'Download_Content');
     } catch (Exception $e) {
       $config['Download_Content'] = '';
@@ -115,6 +118,7 @@ if (!array_key_exists('Download_Content', $config)) {
 
 if (!array_key_exists('Warning_Time', $config)) {
     try {
+      // [* CodeParam Warning_Time ; Value=3 ; Desc=Warning time in seconds *]
       $config['Warning_Time'] = Common::getMonitoringPackParameter($OPT,'Warning_Time');
     } catch (Exception $e) {
       $config['Warning_Time'] = '3';
@@ -123,6 +127,7 @@ if (!array_key_exists('Warning_Time', $config)) {
 
 if (!array_key_exists('Critical_Time', $config)) {
     try {
+      // [* CodeParam Critical_Time ; Value=10 ; Desc=Critical time in seconds *]
       $config['Critical_Time'] = Common::getMonitoringPackParameter($OPT,'Critical_Time');
     } catch (Exception $e) {
       $config['Critical_Time'] = '10';
@@ -131,6 +136,7 @@ if (!array_key_exists('Critical_Time', $config)) {
 
 if (!array_key_exists('Username', $config)) {
     try {
+        // [* CodeParam Username ; Value=username ; Desc=Username for Basic Authentication *]
         $config['Username'] = Common::getMonitoringPackParameter($OPT,'Username');
     } catch (Exception $e) {
         $config['Username'] = '';
@@ -139,6 +145,7 @@ if (!array_key_exists('Username', $config)) {
 
 if (!array_key_exists('Password', $config)) {
     try {
+        // [* CodeParam Password ; Value=password ; Desc=Password for Basic Authentication *]
         $config['Password'] = Common::getMonitoringPackParameter($OPT,'Password');
     } catch (Exception $e) {
         $config['Password'] = '';

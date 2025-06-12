@@ -24,6 +24,7 @@ $cv = new CheckValue(['k' => "$keyword", 'h' => "$host", 's' => "$service", 'Deb
 
 $offset = 0;
 try {
+    // [* CodeParam offset ; Value=3600 ; Desc=offset in seconds *]
     $offset = (int)Common::getMonitoringPackParameter($OPT,'offset');
 } catch (Exception $e) {
 }
@@ -58,11 +59,3 @@ $cv->add([
 ]);
 
 $cv->bye();
-
-
-
-
-
-
-
-

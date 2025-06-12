@@ -22,12 +22,14 @@ CommandLine::terminateOnEmpty($host);
 
 # optinales uebersteuern mittels FQDN, moeglicherweise wird dies in der Zukunft benoetigt
 try {
+   // [* CodeParam FQDN ; Value=develop.itdesign.at ; Desc=FQDN of the server *]
    $host = Common::getMonitoringPackParameter($OPT,'FQDN');
 } catch (Exception $e) {
    fwrite(STDERR, print_r("FQDN Package Parameter not found, using $host\n",1));  
 }
 
 try {
+   // [* CodeParam excludedServerComponentState ; Value=ForwardSyncDaemon,ProvisioningRps ; Desc=comma seperated list of components to exclude from the check *]
    $excludeList = Common::getMonitoringPackParameter($OPT,'excludedServerComponentState');
 } catch (Exception $e) {
    $excludeList = "";
@@ -35,6 +37,7 @@ try {
 }
 
 try {
+    // [* CodeParam PowershellScriptLocation ; Value=C:\ITdesign\Check-ExchangeComponentState.ps1 ; Desc=Location of the powershell script to execute *]
    $powershellScriptLocation = Common::getMonitoringPackParameter($OPT,'PowershellScriptLocation');
 } catch (Exception $e) {
    print("PowershellScriptLocation Parameter not found");

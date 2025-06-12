@@ -27,6 +27,7 @@ $convertUnknown = $OPT['convertUnknown'] ?? false;
 CommandLine::terminateOnEmpty($host);
 
 try {
+  // [* CodeParam VMWare Datacenter ; Value=example-datacenter1 *]
   $datacenter = Common::getMonitoringPackParameter($OPT,'VMWare Datacenter');
 } catch (Exception $e) {
   print('Monitoring Pack Parameter not found.');

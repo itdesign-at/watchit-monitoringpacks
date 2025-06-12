@@ -47,6 +47,7 @@ $filter = FilterThreshold::getIncludeFilter(["h" => "$host", "section" => "disk"
 
 // e.g. $appParams = {"AllowZeroSize":false,"Aggregates":true,"Snapshots":true,"Volumes":false}
 try {
+    // [* CodeParam ApplicationParameters ; Value={"AllowZeroSize":false,"Aggregates":true,"Snapshots":true,"Volumes":false} *]
     $j = Common::getMonitoringPackParameter($OPT,'ApplicationParameters');
     $appParameters = json_decode($j, true);
 } catch (Exception $e) {

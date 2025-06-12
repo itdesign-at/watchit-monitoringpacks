@@ -19,6 +19,7 @@ $debug = $OPT['Debug'] ?? false;
 
 CommandLine::terminateOnEmpty($host);
 
+// [* CodeParam url ; Value=https://example.com ; Desc=URL to check *]
 $url = Common::getMonitoringPackParameter($OPT,'url');
 
 

@@ -31,8 +31,10 @@ $printStderr = function (string $msg) {
     }
 };
 
+
 $datacenter ='';
 try {
+    // [* CodeParam datacenter ; Value=example-datacenter1 *]
     $datacenter = Common::getMonitoringPackParameter($OPT, 'datacenter');
 } catch (Exception $e) {
     print('Code Parameter missing!');
