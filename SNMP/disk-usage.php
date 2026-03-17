@@ -67,7 +67,7 @@ if ($n < 1) {
 }
 
 # read version to be backwards compatible
-$v = file_get_contents("/opt/watchit/etc/version");
+$v = @file_get_contents("/opt/watchit/etc/version");
 $versionDate = ($v === false) ? 0 : intval(substr($v, strpos($v, '+') + 1, 8));
 
 if ($versionDate < 20260310) {
