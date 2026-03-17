@@ -11,6 +11,7 @@
  *
  * 2023-09-23: check 'Summary' key on $storageEntry to
  *             avoid eval problems
+ * 2026-03-17: add new Filters and Thresholds
  */
 require_once("/opt/watchit/sources/php/vendor/autoload.php");
 
@@ -21,6 +22,8 @@ use ITdesign\Plugins\Plugin;
 use ITdesign\Plugins\StorageTable;
 use ITdesign\Utils\CommandLine;
 use ITdesign\Utils\FilterThreshold;
+use ITdesign\Utils\Filters;
+use ITdesign\Utils\Thresholds;
 
 const Description = 'Description';
 
@@ -63,11 +66,17 @@ if ($n < 1) {
     ]);
 }
 
-// set to 'ON' when no include filter is configured. Plugin::compare returns
-// true when the $includeFilter parameter == 'ON' (means take every dataset).
-$includeFilter = FilterThreshold::getIncludeFilter(['h' => $host, 'section' => $section]);
-if ($includeFilter === '') {
-    $includeFilter = 'ON';
+# read version to be backwards compatible
+$v = file_get_contents("/opt/watchit/etc/version");
+$versionDate = ($v === false) ? 0 : intval(substr($v, strpos($v, '+') + 1, 8));
+
+if ($versionDate < 20260310) {
+    // set to 'ON' when no include filter is configured. Plugin::compare returns
+    // true when the $includeFilter parameter == 'ON' (means take every dataset).
+    $includeFilter = FilterThreshold::getIncludeFilter(['h' => $host, 'section' => $section]);
+    if ($includeFilter === '') {
+        $includeFilter = 'ON';
+    }
 }
 
 if ($debug) {
@@ -115,29 +124,43 @@ foreach ($snmpStorageData as $storageEntry) {
             continue;
     }
 
-    // check include filter - take all storage entries if not configured
-    if ($includeFilter != 'ON' && !Plugin::compare($includeFilter, $storageEntry)) {
-        continue;
-    }
-
-    $th = FilterThreshold::getThreshold(['h' => $host, 's' => $description, 'section' => $section]);
-
-    if ($debug) {
-        CheckValue::dbg(__FILE__, __FUNCTION__, $th);
-    }
-
     $cv = new CheckValue(['k' => 'storageEntry', 'Debug' => $debug]);
-
     $cv->add($storageEntry);
-    $cv->add([
-        'h' => "$host",
-        's' => "$service",
-        'w' => $th['w'],
-        'c' => $th['c'],
-        Constants::Text => $storageEntry['Summary'] ?? 'Summary not set',
-        Constants::WarningText => $textTemplate,
-        Constants::CriticalText => $textTemplate,
-    ]);
+
+    if ($versionDate < 20260310) {
+        // check include filter - take all storage entries if not configured
+        if ($includeFilter != 'ON' && !Plugin::compare($includeFilter, $storageEntry)) {
+            continue;
+        }
+        $th = FilterThreshold::getThreshold(['h' => $host, 's' => $description, 'section' => $section]);
+        if ($debug) {
+            CheckValue::dbg(__FILE__, __FUNCTION__, $th);
+        }
+        $cv->add([
+            'h' => "$host",
+            's' => "$service",
+            'w' => $th['w'],
+            'c' => $th['c'],
+            Constants::Text => $storageEntry['Summary'] ?? 'Summary not set',
+            Constants::WarningText => $textTemplate,
+            Constants::CriticalText => $textTemplate,
+        ]);
+    } else {
+        $conf = ['h' => $host, 'section' => $section, 'Debug' => $debug, 'data' => $storageEntry];
+        if (Filters::isFiltered($conf)) {
+            continue;
+        }
+        $exit = Thresholds::getExitState($conf);
+        $cv->add([
+            'h' => "$host",
+            's' => "$service",
+            Constants::Exit => $exit,
+            Constants::Text => $storageEntry['Summary'] ?? 'Summary not set',
+            Constants::WarningText => $textTemplate,
+            Constants::CriticalText => $textTemplate,
+        ]);
+    }
+
 
     // init() does the comparison logic and sets Text, etc.
     $cv->init();
