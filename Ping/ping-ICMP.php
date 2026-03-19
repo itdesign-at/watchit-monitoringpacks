@@ -6,6 +6,7 @@ use ITdesign\Plugins\CheckValue;
 use ITdesign\Plugins\Constants;
 use ITdesign\Utils\CommandLine;
 use ITdesign\Utils\FilterThreshold;
+use ITdesign\Utils\Thresholds;
 
 const binary = "/opt/watchit/bin/pingParser";
 
@@ -48,16 +49,23 @@ if ($data === null) {
     exit(Constants::NUMERIC_UNKNOWN);
 }
 
-$th = FilterThreshold::getThreshold(['h' => $host, 'section' => 'ping']);
+# read version to be backwards compatible
+$v = @file_get_contents("/opt/watchit/etc/version");
+$versionDate = ($v === false) ? 0 : intval(substr($v, strpos($v, '+') + 1, 8));
 
-// use CheckValue to compare against warning and critical
-$cv = new CheckValue([
-    'k' => $keyword,
-    'h' => "$host",
-    's' => "$service",
-    'w' => $th['w'],
-    'c' => $th['c']
-]);
+if ($versionDate < 20260310) {
+    $th = FilterThreshold::getThreshold(['h' => $host, 'section' => 'ping']);
+    $cv = new CheckValue([
+        'k' => $keyword,'h' => "$host",'s' => "$service",
+        'w' => $th['w'],'c' => $th['c']
+    ]);
+} else {
+    $exit = Thresholds::getExitState(['h' => $host, 'section' => 'ping', 'Debug' => $debug, 'data' => $data]);
+    $cv = new CheckValue([
+        'k' => $keyword,'h' => "$host",'s' => "$service",
+        Constants::Exit => $exit, 'Debug' => $debug
+    ]);
+}
 
 if (array_key_exists('Rtt', $data) && array_key_exists('Pl', $data)) {
     $cv->add([
@@ -104,3 +112,4 @@ if (array_key_exists('Rtt', $data) && array_key_exists('Pl', $data)) {
 }
 
 $cv->bye();
+
