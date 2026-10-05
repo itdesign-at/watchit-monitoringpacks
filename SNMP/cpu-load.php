@@ -52,7 +52,8 @@ if (is_array($cpuLoad) && count($cpuLoad) > 0) {
     $cv->add($cpuLoad);
 } else {
     $cv->setUnknown($OPT['convertUnknown'] ?? false,
-        $OPT[Constants::UnknownText] ?? Constants::NoDataViaSNMP);
+    $OPT[Constants::UnknownText] ?? Constants::NoDataViaSNMP);
+    $cv->bye();
 }
 
 $cfg = ['h' => $host, 'section' => 'cpu', 'data' => $cpuLoad, 'Debug' => $debug];
